@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lulu SPORTS CONDITIONING SALON 管理画面（試作品）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif; font-size:16px; color:#222; background:#f4f6f8; line-height:1.6; }
+  .wrap { max-width:640px; margin:0 auto; background:#fff; min-height:100vh; }
+  header { background:#17456e; color:#fff; padding:16px; }
+  header .shop { font-size:19px; font-weight:bold; line-height:1.4; }
+  header .sub { font-size:14px; opacity:.85; margin-top:2px; }
+  .tabs { display:flex; border-bottom:2px solid #17456e; }
+  .tabs button { flex:1; padding:13px 4px; font-size:16px; background:#e8eef4; border:none; cursor:pointer; color:#17456e; font-weight:bold; }
+  .tabs button.active { background:#17456e; color:#fff; }
+  main { padding:16px; }
+  .note { font-size:14px; color:#555; }
+  /* 進み具合 */
+  .steps { display:flex; gap:4px; margin-bottom:18px; }
+  .steps div { flex:1; text-align:center; font-size:13px; padding:7px 2px; border-radius:6px; background:#eef1f4; color:#777; }
+  .steps div.on { background:#17456e; color:#fff; font-weight:bold; }
+  .steps div.done { background:#bcd2e6; color:#17456e; }
+  h2.sec { font-size:19px; color:#17456e; border-left:6px solid #17456e; padding-left:10px; margin:20px 0 12px; }
+  h2.sec:first-child { margin-top:4px; }
+  /* コース */
+  .course { border:2px solid #d6dee6; border-radius:10px; padding:14px; margin-bottom:12px; cursor:pointer; }
+  .course:active { background:#f0f5fa; }
+  .course.sel { border-color:#17456e; background:#eef4fa; }
+  .course .cname { font-size:17px; font-weight:bold; }
+  .course .cmeta { margin-top:4px; color:#444; }
+  .course .price { font-size:18px; font-weight:bold; color:#17456e; }
+  .badge { display:inline-block; background:#e8a13a; color:#fff; font-size:13px; font-weight:bold; border-radius:4px; padding:1px 8px; margin-left:8px; vertical-align:2px; }
+  /* 日付 */
+  .dates { display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; }
+  .dates button { flex:0 0 auto; width:62px; padding:9px 0; border:2px solid #d6dee6; border-radius:10px; background:#fff; font-size:15px; cursor:pointer; line-height:1.35; }
+  .dates button.sel { border-color:#17456e; background:#17456e; color:#fff; font-weight:bold; }
+  .dates button .dw-sat { color:#2a6db0; } .dates button .dw-sun { color:#c0392b; }
+  .dates button.sel .dw-sat, .dates button.sel .dw-sun { color:#fff; }
+  /* 時間枠 */
+  .slots { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:6px; }
+  .slots button { padding:11px 0; font-size:16px; border:2px solid #d6dee6; border-radius:8px; background:#fff; cursor:pointer; line-height:1.3; }
+  .slots button .mk { display:block; font-size:17px; font-weight:bold; color:#1e7d46; }
+  .slots button .mk.mid { color:#c07f13; }
+  .slots button:disabled { background:#f0f0f0; color:#aaa; cursor:default; border-color:#e2e2e2; }
+  .slots button:disabled .mk { color:#c0392b; }
+  .slots button.sel { border-color:#17456e; background:#17456e; color:#fff; }
+  .slots button.sel .mk { color:#fff; }
+  .legend { font-size:14px; color:#555; margin-top:10px; }
+  /* ボタン */
+  .btn { display:block; width:100%; padding:15px; font-size:17px; font-weight:bold; border:none; border-radius:10px; background:#17456e; color:#fff; cursor:pointer; margin-top:16px; }
+  .btn:disabled { background:#b9c6d2; cursor:default; }
+  .btn.sub { background:#fff; color:#17456e; border:2px solid #17456e; }
+  .btn.sm { padding:11px; font-size:16px; }
+  /* フォーム */
+  label.fl { display:block; font-weight:bold; margin:16px 0 6px; }
+  label.fl:first-child { margin-top:4px; }
+  input.fi, textarea.fi { width:100%; padding:13px; font-size:16px; border:2px solid #c9d3dd; border-radius:8px; background:#fff; }
+  textarea.fi { min-height:110px; }
+  .req { color:#c0392b; font-size:14px; font-weight:bold; }
+  /* 確認 */
+  .confirm { border:2px solid #d6dee6; border-radius:10px; padding:14px; }
+  .confirm dl { display:grid; grid-template-columns:96px 1fr; row-gap:10px; }
+  .confirm dt { color:#666; font-size:15px; }
+  .confirm dd { font-weight:bold; }
+  .done-box { text-align:center; padding:26px 6px; }
+  .done-box .big { font-size:22px; font-weight:bold; color:#17456e; margin-bottom:10px; }
+  .hidden { display:none; }
+  /* 管理画面 */
+  .bk { border:2px solid #d6dee6; border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+  .bk .tm { font-size:18px; font-weight:bold; color:#17456e; }
+  .bk .who { font-weight:bold; }
+  .cust { border:2px solid #d6dee6; border-radius:10px; padding:13px 14px; margin-bottom:10px; cursor:pointer; width:100%; text-align:left; background:#fff; font-size:16px; }
+  .cust:active { background:#f0f5fa; }
+  .cust .nm { font-weight:bold; font-size:17px; }
+  .cust .last { font-size:14px; color:#555; }
+  .detail { border:2px solid #17456e; border-radius:10px; padding:14px; background:#fbfcfe; }
+  .lastbox { background:#eef4fa; border-radius:8px; padding:10px 12px; margin:12px 0; }
+  .lastbox .lb-t { font-size:14px; color:#17456e; font-weight:bold; }
+  .lastbox .lb-v { font-size:17px; font-weight:bold; }
+  .hist { border-top:1px solid #dde4ea; padding:8px 0; }
+  .hist .hd { color:#555; font-size:15px; }
+  .mic-row { display:flex; gap:10px; align-items:center; margin-top:10px; }
+  .mic { padding:12px 18px; font-size:16px; font-weight:bold; border:none; border-radius:24px; background:#17456e; color:#fff; cursor:pointer; }
+  .mic.rec { background:#c0392b; }
+  .mic:disabled { background:#b9c6d2; }
+  .remind { border:2px dashed #17456e; border-radius:10px; padding:14px; background:#fbfcfe; }
+  .remind .mail { background:#fff; border:1px solid #d6dee6; border-radius:8px; padding:12px; margin-top:10px; }
+  footer { padding:18px 16px 26px; text-align:center; font-size:14px; color:#888; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="shop">lulu SPORTS CONDITIONING SALON<br>～横浜・金沢文庫～</div>
+    <div class="sub">スポーツ整体lulu ／ 管理画面（安宅さん用）</div>
+  </header>
+
+  <!-- ============ 管理画面 ============ -->
+  <main id="view-admin">
+    <h2 class="sec">今日の予約一覧</h2>
+    <p class="note" id="today-label"></p>
+    <div id="today-list" style="margin-top:10px;"></div>
+
+    <h2 class="sec">顧客リスト</h2>
+    <p class="note">お客様をタップすると、基本情報・来店履歴・カルテが開きます。</p>
+    <div id="cust-list" style="margin-top:10px;"></div>
+    <div id="cust-detail" class="hidden">
+      <div class="detail">
+        <div id="detail-body"></div>
+        <label class="fl" for="karte-memo">カルテ（メモ）</label>
+        <textarea class="fi" id="karte-memo" placeholder="施術内容・状態・次回の注意点など"></textarea>
+        <div class="mic-row">
+          <button class="mic" id="mic-btn" type="button">🎤 マイクで入力</button>
+          <span class="note" id="mic-status">ボタンを押して話すと、声が文字になってメモに入ります。</span>
+        </div>
+        <button class="btn sm" type="button" onclick="saveKarte()">カルテを保存する（試作品のため保存は仮動作です）</button>
+        <p class="note" id="karte-saved" style="margin-top:8px;"></p>
+        <button class="btn sub sm" type="button" onclick="closeDetail()">← 顧客リストに戻る</button>
+      </div>
+    </div>
+
+    <h2 class="sec">前日リマインドメール（自動送信）</h2>
+    <div class="remind">
+      <p>ご予約の前日に、下記のようなメールをお客様へ自動でお送りする仕組みです。文面の名前・日時・コースは、予約台帳から自動で差し込まれます。</p>
+      <div class="mail" id="remind-example"></div>
+      <p class="note" style="margin-top:10px;">※これは表示例（モック）です。実際の送信は本番の仕組みで自動化します。</p>
+    </div>
+  </main>
+
+  <footer>試作品（サンプルデータ）<br>表示されているお客様・予約はすべてサンプルです</footer>
+</div>
+
+<script>
+/* ================= データ（後でスプレッドシート連携に差し替え可能な構造） ================= */
+const COURSES = [
+  { id:"c1", name:"根本改善コース（スポーツ整体＋自宅エクササイズ提案付）", minutes:100, price:13900, pop:"" },
+  { id:"c2", name:"首肩集中コース", minutes:50, price:6900, pop:"人気No.1" },
+  { id:"c3", name:"腰回り集中コース", minutes:50, price:6900, pop:"人気No.2" },
+  { id:"c4", name:"オーダーメイド整体（当日相談で決める）", minutes:50, price:6900, pop:"" },
+  { id:"c5", name:"時短ケア（平日12時〜15時開始限定）", minutes:30, price:5000, pop:"" }
+];
+const CUSTOMERS = [
+  { id:"u1", name:"山田花子（サンプル）", tel:"090-0000-1111", mail:"hanako@example.jp",
+    profile:"会社員。デスクワーク中心。慢性的に首・肩が重い。月1回ペース希望。",
+    karte:"首肩まわりの緊張が強い。施術後は可動域が広がったと実感あり。次回は骨盤まわりも確認。",
+    visits:[ {date:"2026-10-08", courseId:"c2"}, {date:"2026-09-10", courseId:"c2"}, {date:"2026-08-12", courseId:"c4"} ] },
+  { id:"u2", name:"佐藤健一（サンプル）", tel:"090-0000-2222", mail:"kenichi@example.jp",
+    profile:"週末にランニング。腰の張りが出やすい。大会前の調整で来店。",
+    karte:"腰椎まわりの張り。左側がやや強い。走り方の癖も確認済み。次回は足首も見る。",
+    visits:[ {date:"2026-10-22", courseId:"c3"}, {date:"2026-09-25", courseId:"c1"} ] },
+  { id:"u3", name:"鈴木美香（サンプル）", tel:"090-0000-3333", mail:"mika@example.jp",
+    profile:"子育て中。抱っこで腕と腰に負担。短時間コースを平日に利用。",
+    karte:"右腕の疲労と腰の重さ。本人は時短ケアで十分に楽になるとのこと。",
+    visits:[ {date:"2026-10-29", courseId:"c5"}, {date:"2026-10-15", courseId:"c5"} ] },
+  { id:"u4", name:"田中翔太（サンプル）", tel:"090-0000-4444", mail:"shota@example.jp",
+    profile:"学生アスリート（サッカー）。練習後のケアと怪我予防。",
+    karte:"太もも裏の張り。根本改善コースで全身調整＋自宅エクササイズ提案済み。",
+    visits:[ {date:"2026-10-30", courseId:"c1"} ] }
+];
+/* 今日の予約サンプル（日付は表示時に「今日」へ差し替える） */
+const BOOKINGS = [
+  { time:"10:00", customerId:"u1", courseId:"c2" },
+  { time:"11:30", customerId:"u2", courseId:"c3" },
+  { time:"14:00", customerId:"u3", courseId:"c5" },
+  { time:"16:00", customerId:"u4", courseId:"c1" },
+  { time:"18:30", customerId:"u1", courseId:"c4" }
+];
+const OPEN_HOUR = 10, CLOSE_HOUR = 20; /* 10:00〜20:00、30分刻み（開始時刻） */
+
+/* ================= 共通ユーティリティ ================= */
+const DOW = ["日","月","火","水","木","金","土"];
+function fmtDate(d){ return d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日（"+DOW[d.getDay()]+"）"; }
+function fmtPrice(n){ return "¥"+n.toLocaleString("ja-JP"); }
+function courseById(id){ return COURSES.find(c=>c.id===id); }
+function custById(id){ return CUSTOMERS.find(c=>c.id===id); }
+function endTime(start, minutes){
+  const [h,m] = start.split(":").map(Number);
+  const t = h*60+m+minutes;
+  return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");
+}
+function dateKey(d){ return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+/* 空き状況：日付と時刻から決定的に作る（見本用の模様） */
+function availability(dateStr, time){
+  let h = 0; const s = dateStr+" "+time;
+  for (let i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) % 997; }
+  const r = h % 10;
+  if (r <= 3) return "◎";
+  if (r <= 6) return "○";
+  if (r <= 8) return "△";
+  return "×";
+}
+
+/* ================= 管理画面 ================= */
+function renderAdmin(){
+  const today = new Date();
+  document.getElementById("today-label").textContent = fmtDate(today)+" のご予約です。";
+  const box = document.getElementById("today-list");
+  box.innerHTML = "";
+  BOOKINGS.slice().sort((a,b)=>a.time<b.time?-1:1).forEach(bk=>{
+    const cu = custById(bk.customerId), co = courseById(bk.courseId);
+    const d = document.createElement("div");
+    d.className = "bk";
+    d.innerHTML = '<span class="tm">'+bk.time+"〜"+endTime(bk.time, co.minutes)+'</span>　<span class="who">'+cu.name+'</span><br>'
+      + co.name+"（"+co.minutes+"分／"+fmtPrice(co.price)+"）";
+    box.appendChild(d);
+  });
+  const cl = document.getElementById("cust-list");
+  cl.innerHTML = "";
+  CUSTOMERS.forEach(cu=>{
+    const last = cu.visits[0];
+    const b = document.createElement("button");
+    b.className = "cust";
+    b.innerHTML = '<span class="nm">'+cu.name+'</span><br><span class="last">前回：'
+      + last.date.replace(/-/g,"/")+" ／ "+courseById(last.courseId).name+'</span>';
+    b.onclick = ()=>openDetail(cu.id);
+    cl.appendChild(b);
+  });
+  /* リマインドメール表示例：先頭のお客様・予約で文面を組み立てる */
+  const bk = BOOKINGS[0], cu = custById(bk.customerId), co = courseById(bk.courseId);
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
+  document.getElementById("remind-example").textContent =
+    cu.name.replace("（サンプル）","")+"様、明日"+fmtDate(tomorrow)+" "+bk.time+"から"+endTime(bk.time, co.minutes)+"まで、"+co.name+"のご予約をいただいております。"
+    + " お気をつけてお越しください。 lulu SPORTS CONDITIONING SALON";
+}
+let currentCust = null;
+function openDetail(id){
+  currentCust = custById(id);
+  const cu = currentCust;
+  const last = cu.visits[0];
+  const lc = courseById(last.courseId);
+  let html = '<div style="font-size:18px;font-weight:bold;">'+cu.name+'</div>'
+    + '<p style="margin-top:6px;">電話：'+cu.tel+'<br>メール：'+cu.mail+'<br>プロフィール：'+cu.profile+'</p>'
+    + '<div class="lastbox"><div class="lb-t">▼ 前回の施術（これが一番上に見えます）</div>'
+    + '<div class="lb-v">'+last.date.replace(/-/g,"/")+" ／ "+lc.name+"（"+lc.minutes+"分）</div></div>"
+    + '<div style="font-weight:bold;margin-bottom:4px;">来店履歴</div>';
+  cu.visits.forEach(v=>{
+    const co = courseById(v.courseId);
+    html += '<div class="hist"><span class="hd">'+v.date.replace(/-/g,"/")+'</span>　'+co.name+'（'+co.minutes+'分／'+fmtPrice(co.price)+'）</div>';
+  });
+  document.getElementById("detail-body").innerHTML = html;
+  document.getElementById("karte-memo").value = cu.karte || "";
+  document.getElementById("karte-saved").textContent = "";
+  document.getElementById("cust-detail").classList.remove("hidden");
+  document.getElementById("cust-detail").scrollIntoView({behavior:"smooth"});
+}
+function closeDetail(){
+  stopMic();
+  document.getElementById("cust-detail").classList.add("hidden");
+  window.scrollTo(0,0);
+}
+function saveKarte(){
+  if (currentCust) currentCust.karte = document.getElementById("karte-memo").value;
+  document.getElementById("karte-saved").textContent = "保存しました（試作品のため、この画面の中だけの保存です）。";
+}
+
+/* ================= 音声入力（Web Speech API） ================= */
+let recog = null, recognizing = false;
+function stopMic(){
+  if (recog && recognizing){ try{ recog.stop(); }catch(e){} }
+  recognizing = false;
+  const btn = document.getElementById("mic-btn");
+  if (btn){ btn.classList.remove("rec"); btn.textContent = "🎤 マイクで入力"; }
+}
+(function setupMic(){
+  const btn = document.getElementById("mic-btn");
+  const status = document.getElementById("mic-status");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR){
+    btn.disabled = true;
+    status.textContent = "この端末・ブラウザでは音声入力に対応していません。キーボードのマイク入力をご利用ください。";
+    return;
+  }
+  recog = new SR();
+  recog.lang = "ja-JP";
+  recog.interimResults = false;
+  recog.continuous = false;
+  recog.onresult = (ev)=>{
+    let text = "";
+    for (let i=ev.resultIndex; i<ev.results.length; i++){ text += ev.results[i][0].transcript; }
+    const memo = document.getElementById("karte-memo");
+    memo.value += (memo.value && !memo.value.endsWith("。") && !memo.value.endsWith("\n") ? "。" : "") + text;
+    status.textContent = "入力しました。続けて話す場合は、もう一度ボタンを押してください。";
+  };
+  recog.onerror = ()=>{ stopMic(); status.textContent = "うまく聞き取れませんでした。もう一度お試しください。"; };
+  recog.onend = ()=>{ stopMic(); };
+  btn.onclick = ()=>{
+    if (recognizing){ stopMic(); status.textContent = "止めました。"; return; }
+    try{
+      recog.start();
+      recognizing = true;
+      btn.classList.add("rec");
+      btn.textContent = "⏹ 録音中…（押すと止まります）";
+      status.textContent = "聞き取り中です。カルテの内容を話してください。";
+    }catch(e){
+      status.textContent = "音声入力を開始できませんでした。";
+    }
+  };
+})();
+
+</script>
+<script>
+renderAdmin();
+</script>
+</body>
+</html>

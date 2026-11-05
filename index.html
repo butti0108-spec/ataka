@@ -95,10 +95,6 @@
     <div class="shop">lulu SPORTS CONDITIONING SALON<br>～横浜・金沢文庫～</div>
     <div class="sub">スポーツ整体lulu ／ オンライン予約</div>
   </header>
-  <div class="tabs">
-    <button id="tab-book" class="active" onclick="showView('book')">ご予約</button>
-    <button id="tab-admin" onclick="showView('admin')">管理画面（安宅さん用）</button>
-  </div>
 
   <!-- ============ 予約画面 ============ -->
   <main id="view-book">
@@ -164,38 +160,6 @@
     </section>
   </main>
 
-  <!-- ============ 管理画面 ============ -->
-  <main id="view-admin" class="hidden">
-    <h2 class="sec">今日の予約一覧</h2>
-    <p class="note" id="today-label"></p>
-    <div id="today-list" style="margin-top:10px;"></div>
-
-    <h2 class="sec">顧客リスト</h2>
-    <p class="note">お客様をタップすると、基本情報・来店履歴・カルテが開きます。</p>
-    <div id="cust-list" style="margin-top:10px;"></div>
-    <div id="cust-detail" class="hidden">
-      <div class="detail">
-        <div id="detail-body"></div>
-        <label class="fl" for="karte-memo">カルテ（メモ）</label>
-        <textarea class="fi" id="karte-memo" placeholder="施術内容・状態・次回の注意点など"></textarea>
-        <div class="mic-row">
-          <button class="mic" id="mic-btn" type="button">🎤 マイクで入力</button>
-          <span class="note" id="mic-status">ボタンを押して話すと、声が文字になってメモに入ります。</span>
-        </div>
-        <button class="btn sm" type="button" onclick="saveKarte()">カルテを保存する（試作品のため保存は仮動作です）</button>
-        <p class="note" id="karte-saved" style="margin-top:8px;"></p>
-        <button class="btn sub sm" type="button" onclick="closeDetail()">← 顧客リストに戻る</button>
-      </div>
-    </div>
-
-    <h2 class="sec">前日リマインドメール（自動送信）</h2>
-    <div class="remind">
-      <p>ご予約の前日に、下記のようなメールをお客様へ自動でお送りする仕組みです。文面の名前・日時・コースは、予約台帳から自動で差し込まれます。</p>
-      <div class="mail" id="remind-example"></div>
-      <p class="note" style="margin-top:10px;">※これは表示例（モック）です。実際の送信は本番の仕組みで自動化します。</p>
-    </div>
-  </main>
-
   <footer>試作品（サンプルデータ）<br>表示されているお客様・予約はすべてサンプルです</footer>
 </div>
 
@@ -259,14 +223,6 @@ function availability(dateStr, time){
   return "×";
 }
 
-/* ================= 画面切替 ================= */
-function showView(v){
-  document.getElementById("view-book").classList.toggle("hidden", v!=="book");
-  document.getElementById("view-admin").classList.toggle("hidden", v!=="admin");
-  document.getElementById("tab-book").classList.toggle("active", v==="book");
-  document.getElementById("tab-admin").classList.toggle("active", v==="admin");
-  window.scrollTo(0,0);
-}
 </script>
 
 <script>
@@ -380,114 +336,8 @@ function resetBooking(){
   goStep(1);
 }
 
-/* ================= 管理画面 ================= */
-function renderAdmin(){
-  const today = new Date();
-  document.getElementById("today-label").textContent = fmtDate(today)+" のご予約です。";
-  const box = document.getElementById("today-list");
-  box.innerHTML = "";
-  BOOKINGS.slice().sort((a,b)=>a.time<b.time?-1:1).forEach(bk=>{
-    const cu = custById(bk.customerId), co = courseById(bk.courseId);
-    const d = document.createElement("div");
-    d.className = "bk";
-    d.innerHTML = '<span class="tm">'+bk.time+"〜"+endTime(bk.time, co.minutes)+'</span>　<span class="who">'+cu.name+'</span><br>'
-      + co.name+"（"+co.minutes+"分／"+fmtPrice(co.price)+"）";
-    box.appendChild(d);
-  });
-  const cl = document.getElementById("cust-list");
-  cl.innerHTML = "";
-  CUSTOMERS.forEach(cu=>{
-    const last = cu.visits[0];
-    const b = document.createElement("button");
-    b.className = "cust";
-    b.innerHTML = '<span class="nm">'+cu.name+'</span><br><span class="last">前回：'
-      + last.date.replace(/-/g,"/")+" ／ "+courseById(last.courseId).name+'</span>';
-    b.onclick = ()=>openDetail(cu.id);
-    cl.appendChild(b);
-  });
-  /* リマインドメール表示例：先頭のお客様・予約で文面を組み立てる */
-  const bk = BOOKINGS[0], cu = custById(bk.customerId), co = courseById(bk.courseId);
-  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
-  document.getElementById("remind-example").textContent =
-    cu.name.replace("（サンプル）","")+"様、明日"+fmtDate(tomorrow)+" "+bk.time+"から"+endTime(bk.time, co.minutes)+"まで、"+co.name+"のご予約をいただいております。"
-    + " お気をつけてお越しください。 lulu SPORTS CONDITIONING SALON";
-}
-let currentCust = null;
-function openDetail(id){
-  currentCust = custById(id);
-  const cu = currentCust;
-  const last = cu.visits[0];
-  const lc = courseById(last.courseId);
-  let html = '<div style="font-size:18px;font-weight:bold;">'+cu.name+'</div>'
-    + '<p style="margin-top:6px;">電話：'+cu.tel+'<br>メール：'+cu.mail+'<br>プロフィール：'+cu.profile+'</p>'
-    + '<div class="lastbox"><div class="lb-t">▼ 前回の施術（これが一番上に見えます）</div>'
-    + '<div class="lb-v">'+last.date.replace(/-/g,"/")+" ／ "+lc.name+"（"+lc.minutes+"分）</div></div>"
-    + '<div style="font-weight:bold;margin-bottom:4px;">来店履歴</div>';
-  cu.visits.forEach(v=>{
-    const co = courseById(v.courseId);
-    html += '<div class="hist"><span class="hd">'+v.date.replace(/-/g,"/")+'</span>　'+co.name+'（'+co.minutes+'分／'+fmtPrice(co.price)+'）</div>';
-  });
-  document.getElementById("detail-body").innerHTML = html;
-  document.getElementById("karte-memo").value = cu.karte || "";
-  document.getElementById("karte-saved").textContent = "";
-  document.getElementById("cust-detail").classList.remove("hidden");
-  document.getElementById("cust-detail").scrollIntoView({behavior:"smooth"});
-}
-function closeDetail(){
-  stopMic();
-  document.getElementById("cust-detail").classList.add("hidden");
-  window.scrollTo(0,0);
-}
-function saveKarte(){
-  if (currentCust) currentCust.karte = document.getElementById("karte-memo").value;
-  document.getElementById("karte-saved").textContent = "保存しました（試作品のため、この画面の中だけの保存です）。";
-}
-
-/* ================= 音声入力（Web Speech API） ================= */
-let recog = null, recognizing = false;
-function stopMic(){
-  if (recog && recognizing){ try{ recog.stop(); }catch(e){} }
-  recognizing = false;
-  const btn = document.getElementById("mic-btn");
-  if (btn){ btn.classList.remove("rec"); btn.textContent = "🎤 マイクで入力"; }
-}
-(function setupMic(){
-  const btn = document.getElementById("mic-btn");
-  const status = document.getElementById("mic-status");
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR){
-    btn.disabled = true;
-    status.textContent = "この端末・ブラウザでは音声入力に対応していません。キーボードのマイク入力をご利用ください。";
-    return;
-  }
-  recog = new SR();
-  recog.lang = "ja-JP";
-  recog.interimResults = false;
-  recog.continuous = false;
-  recog.onresult = (ev)=>{
-    let text = "";
-    for (let i=ev.resultIndex; i<ev.results.length; i++){ text += ev.results[i][0].transcript; }
-    const memo = document.getElementById("karte-memo");
-    memo.value += (memo.value && !memo.value.endsWith("。") && !memo.value.endsWith("\n") ? "。" : "") + text;
-    status.textContent = "入力しました。続けて話す場合は、もう一度ボタンを押してください。";
-  };
-  recog.onerror = ()=>{ stopMic(); status.textContent = "うまく聞き取れませんでした。もう一度お試しください。"; };
-  recog.onend = ()=>{ stopMic(); };
-  btn.onclick = ()=>{
-    if (recognizing){ stopMic(); status.textContent = "止めました。"; return; }
-    try{
-      recog.start();
-      recognizing = true;
-      btn.classList.add("rec");
-      btn.textContent = "⏹ 録音中…（押すと止まります）";
-      status.textContent = "聞き取り中です。カルテの内容を話してください。";
-    }catch(e){
-      status.textContent = "音声入力を開始できませんでした。";
-    }
-  };
-})();
-
-/* ================= 初期化 ================= */
+</script>
+<script>
 (function init(){
   const today = new Date();
   days = [];
@@ -495,7 +345,6 @@ function stopMic(){
   state.date = days[0]; state.dateStr = dateKey(days[0]);
   renderCourses(); renderDates(); renderSlots();
   goStep(1);
-  renderAdmin();
 })();
 </script>
 </body>
