@@ -39,6 +39,8 @@
   .cust .tm { font-size:17px; font-weight:bold; color:#1D2C4D; }
   .cust .last { font-size:14px; color:#555; }
   .detail { border:2px solid #1D2C4D; border-radius:10px; padding:14px; background:#fbfcfe; }
+  .acc { overflow:hidden; height:0; transition:height .35s ease; }
+  .acc-inner { padding:2px 0 12px; }
   .lastbox { background:#eceff5; border-radius:8px; padding:10px 12px; margin:12px 0; }
   .lastbox .lb-t { font-size:14px; color:#1D2C4D; font-weight:bold; }
   .lastbox .lb-v { font-size:17px; font-weight:bold; }
@@ -78,25 +80,29 @@
   <main id="view-cust" class="hidden">
     <h2 class="sec">顧客リスト</h2>
     <p class="note">お客様をタップすると、基本情報・来店履歴・カルテが開きます。</p>
+    <input class="fi" id="cust-search" type="text" placeholder="名前・カナ・電話番号・メールで検索" oninput="filterCustomers()" style="margin-top:10px;">
     <div id="cust-list" style="margin-top:10px;"></div>
+    <p class="note hidden" id="cust-noresult" style="margin-top:6px;">該当するお客様がいません</p>
   </main>
 
-  <!-- ============ お客様の詳細（共通） ============ -->
-  <main id="view-detail" class="hidden">
-    <h2 class="sec">お客様の詳細</h2>
-    <div class="detail">
-      <div id="detail-body"></div>
-      <label class="fl" for="karte-memo">カルテ（メモ）</label>
-      <textarea class="fi" id="karte-memo" placeholder="施術内容・状態・次回の注意点など"></textarea>
-      <div class="mic-row">
-        <button class="mic" id="mic-btn" type="button">🎤 マイクで入力</button>
-        <span class="note" id="mic-status">ボタンを押して話すと、声が文字になってメモに入ります。</span>
+  <!-- ============ お客様の詳細（共通・アコーディオン） ============ -->
+  <div id="detail-acc" class="acc">
+    <div class="acc-inner">
+      <h2 class="sec">お客様の詳細</h2>
+      <div class="detail">
+        <div id="detail-body"></div>
+        <label class="fl" for="karte-memo">カルテ（メモ）</label>
+        <textarea class="fi" id="karte-memo" placeholder="施術内容・状態・次回の注意点など"></textarea>
+        <div class="mic-row">
+          <button class="mic" id="mic-btn" type="button">🎤 マイクで入力</button>
+          <span class="note" id="mic-status">ボタンを押して話すと、声が文字になってメモに入ります。</span>
+        </div>
+        <button class="btn sm" type="button" onclick="saveKarte()">カルテを保存する（試作品のため保存は仮動作です）</button>
+        <p class="note" id="karte-saved" style="margin-top:8px;"></p>
+        <button class="btn sub sm" type="button" onclick="closeDetail()">← 一覧に戻る</button>
       </div>
-      <button class="btn sm" type="button" onclick="saveKarte()">カルテを保存する（試作品のため保存は仮動作です）</button>
-      <p class="note" id="karte-saved" style="margin-top:8px;"></p>
-      <button class="btn sub sm" type="button" onclick="closeDetail()">← 一覧に戻る</button>
     </div>
-  </main>
+  </div>
 
   <!-- ============ リマインドメール ============ -->
   <main id="view-remind" class="hidden">
@@ -125,19 +131,19 @@ const COURSES = [
   { id:"c9", name:"リカバリーコンプレッションブーツ（Normatec）", minutes:20, price:3000, approval:true }
 ];
 const CUSTOMERS = [
-  { id:"u1", name:"山田花子（サンプル）", tel:"090-0000-1111", mail:"hanako@example.jp",
+  { id:"u1", name:"山田花子（サンプル）", kana:"ヤマダハナコ", tel:"090-0000-1111", mail:"hanako@example.jp",
     profile:"会社員。デスクワーク中心。慢性的に首・肩が重い。月1回ペース希望。",
     karte:"首肩まわりの緊張が強い。施術後は可動域が広がったと実感あり。次回は骨盤まわりも確認。",
     visits:[ {date:"2026-10-08", courseId:"c4"}, {date:"2026-09-10", courseId:"c4"}, {date:"2026-08-12", courseId:"c2"} ] },
-  { id:"u2", name:"佐藤健一（サンプル）", tel:"090-0000-2222", mail:"kenichi@example.jp",
+  { id:"u2", name:"佐藤健一（サンプル）", kana:"サトウケンイチ", tel:"090-0000-2222", mail:"kenichi@example.jp",
     profile:"週末にランニング。腰の張りが出やすい。大会前の調整で来店。",
     karte:"腰椎まわりの張り。左側がやや強い。走り方の癖も確認済み。次回は足首も見る。",
     visits:[ {date:"2026-10-22", courseId:"c2"}, {date:"2026-09-25", courseId:"c1"} ] },
-  { id:"u3", name:"鈴木美香（サンプル）", tel:"090-0000-3333", mail:"mika@example.jp",
+  { id:"u3", name:"鈴木美香（サンプル）", kana:"スズキミカ", tel:"090-0000-3333", mail:"mika@example.jp",
     profile:"子育て中。抱っこで腕と腰に負担。ポイントケアコースを平日に利用。",
     karte:"右腕の疲労と腰の重さ。本人はポイントケアで十分に楽になるとのこと。",
     visits:[ {date:"2026-10-29", courseId:"c4"}, {date:"2026-10-15", courseId:"c4"} ] },
-  { id:"u4", name:"田中翔太（サンプル）", tel:"090-0000-4444", mail:"shota@example.jp",
+  { id:"u4", name:"田中翔太（サンプル）", kana:"タナカショウタ", tel:"090-0000-4444", mail:"shota@example.jp",
     profile:"学生アスリート（サッカー）。練習後のケアと怪我予防。",
     karte:"太もも裏の張り。体験コースで全身調整＋自宅エクササイズ提案済み。",
     visits:[ {date:"2026-10-30", courseId:"c1"} ] }
@@ -166,11 +172,10 @@ function courseLabel(co){ return co.name + (co.approval ? '<span class="badge">�
 
 /* ================= タブ ================= */
 let currentTab = "today";
-let detailFrom = "today";
 function showTab(name){
   currentTab = name;
   stopMic();
-  document.getElementById("view-detail").classList.add("hidden");
+  resetDetail();
   ["today","cust","remind"].forEach(t=>{
     document.getElementById("view-"+t).classList.toggle("hidden", t!==name);
     document.getElementById("tab-"+t).classList.toggle("active", t===name);
@@ -190,20 +195,10 @@ function renderAdmin(){
     b.className = "cust";
     b.innerHTML = '<span class="tm">'+bk.time+"〜"+endTime(bk.time, co.minutes)+'</span>　<span class="nm">'+cu.name+'</span><br>'
       + '<span class="last">'+courseLabel(co)+"（"+co.minutes+"分／"+fmtPrice(co.price)+"）</span>";
-    b.onclick = ()=>openDetail(cu.id);
+    b.onclick = ()=>openDetail(cu.id, b);
     box.appendChild(b);
   });
-  const cl = document.getElementById("cust-list");
-  cl.innerHTML = "";
-  CUSTOMERS.forEach(cu=>{
-    const last = cu.visits[0];
-    const b = document.createElement("button");
-    b.className = "cust";
-    b.innerHTML = '<span class="nm">'+cu.name+'</span><br><span class="last">前回：'
-      + last.date.replace(/-/g,"/")+" ／ "+courseById(last.courseId).name+'</span>';
-    b.onclick = ()=>openDetail(cu.id);
-    cl.appendChild(b);
-  });
+  renderCustList(CUSTOMERS);
   /* リマインドメール表示例：先頭のお客様・予約で文面を組み立てる */
   const bk = BOOKINGS[0], cu = custById(bk.customerId), co = courseById(bk.courseId);
   const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
@@ -211,9 +206,44 @@ function renderAdmin(){
     cu.name.replace("（サンプル）","")+"様、明日"+fmtDate(tomorrow)+" "+bk.time+"から"+endTime(bk.time, co.minutes)+"まで、"+co.name+"のご予約をいただいております。"
     + " お気をつけてお越しください。 lulu SPORTS CONDITIONING SALON";
 }
+function renderCustList(list){
+  const cl = document.getElementById("cust-list");
+  const acc = accEl();
+  if (acc.parentElement === cl){ resetDetail(); document.getElementById("view-remind").after(acc); }
+  cl.innerHTML = "";
+  list.forEach(cu=>{
+    const last = cu.visits[0];
+    const b = document.createElement("button");
+    b.className = "cust";
+    b.innerHTML = '<span class="nm">'+cu.name+'</span><br><span class="last">前回：'
+      + last.date.replace(/-/g,"/")+" ／ "+courseById(last.courseId).name+'</span>';
+    b.onclick = ()=>openDetail(cu.id, b);
+    cl.appendChild(b);
+  });
+  document.getElementById("cust-noresult").classList.toggle("hidden", list.length > 0);
+}
+function filterCustomers(){
+  const q = document.getElementById("cust-search").value.trim();
+  if (!q){ renderCustList(CUSTOMERS); return; }
+  const qk = q.replace(/[ぁ-ゖ]/g, s=>String.fromCharCode(s.charCodeAt(0)+0x60));
+  const ql = q.toLowerCase();
+  const digits = q.replace(/\D/g, "");
+  const list = CUSTOMERS.filter(cu=>{
+    if (cu.name.includes(q)) return true;
+    if (cu.kana && cu.kana.includes(qk)) return true;
+    if (cu.mail.toLowerCase().includes(ql)) return true;
+    if (digits && cu.tel.replace(/\D/g, "").includes(digits)) return true;
+    return false;
+  });
+  renderCustList(list);
+}
 let currentCust = null;
-function openDetail(id){
-  detailFrom = currentTab;
+let openAnchor = null;
+let detailTimer = null;
+function accEl(){ return document.getElementById("detail-acc"); }
+function openDetail(id, anchor){
+  const acc = accEl();
+  if (openAnchor === anchor){ closeDetail(); return; }
   currentCust = custById(id);
   const cu = currentCust;
   const last = cu.visits[0];
@@ -230,17 +260,36 @@ function openDetail(id){
   document.getElementById("detail-body").innerHTML = html;
   document.getElementById("karte-memo").value = cu.karte || "";
   document.getElementById("karte-saved").textContent = "";
-  ["today","cust","remind"].forEach(t=>document.getElementById("view-"+t).classList.add("hidden"));
-  document.getElementById("view-detail").classList.remove("hidden");
-  window.scrollTo(0,0);
+  stopMic();
+  anchor.after(acc);
+  openAnchor = anchor;
+  const inner = acc.firstElementChild;
+  acc.style.transition = "none";
+  acc.style.height = "0px";
+  void acc.offsetHeight;
+  acc.style.transition = "";
+  requestAnimationFrame(()=>{ acc.style.height = inner.offsetHeight + "px"; });
+  clearTimeout(detailTimer);
+  detailTimer = setTimeout(()=>{ if (openAnchor === anchor) acc.style.height = "auto"; }, 420);
+  setTimeout(()=>{ anchor.scrollIntoView({behavior:"smooth", block:"start"}); }, 80);
 }
 function closeDetail(){
+  const acc = accEl();
+  if (!openAnchor) return;
   stopMic();
-  document.getElementById("view-detail").classList.add("hidden");
-  document.getElementById("view-"+detailFrom).classList.remove("hidden");
-  window.scrollTo(0,0);
+  const anchor = openAnchor;
+  openAnchor = null;
+  acc.style.height = acc.offsetHeight + "px";
+  void acc.offsetHeight;
+  requestAnimationFrame(()=>{ acc.style.height = "0px"; });
+  clearTimeout(detailTimer);
+  detailTimer = setTimeout(()=>{ anchor.scrollIntoView({behavior:"smooth", block:"start"}); }, 400);
 }
-function saveKarte(){
+function resetDetail(){
+  openAnchor = null;
+  clearTimeout(detailTimer);
+  accEl().style.height = "0px";
+}function saveKarte(){
   if (currentCust) currentCust.karte = document.getElementById("karte-memo").value;
   document.getElementById("karte-saved").textContent = "保存しました（試作品のため、この画面の中だけの保存です）。";
 }
