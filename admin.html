@@ -253,10 +253,12 @@ function filterCustomers(){
 let currentCust = null;
 let openAnchor = null;
 let detailTimer = null;
+let closeSeq = 0;
 function accEl(){ return document.getElementById("detail-acc"); }
 function openDetail(id, anchor){
   const acc = accEl();
   if (openAnchor === anchor){ closeDetail(); return; }
+  closeSeq++;
   currentCust = custById(id);
   const cu = currentCust;
   const last = cu.visits[0];
@@ -310,23 +312,32 @@ function closeDetail(){
   if (!openAnchor) return;
   stopMic();
   openAnchor = null;
-  acc.style.height = acc.offsetHeight + "px";
-  void acc.offsetHeight;
-  requestAnimationFrame(()=>{ acc.style.height = "0px"; });
   clearTimeout(detailTimer);
-  /* 動き（閉じる時）：畳むのと同時に、画面は一番上のメニュー（タブ）のところまで戻る */
+  const seq = ++closeSeq;
+  const collapse = ()=>{
+    if (seq !== closeSeq) return;
+    acc.style.height = acc.offsetHeight + "px";
+    void acc.offsetHeight;
+    requestAnimationFrame(()=>{ if (seq === closeSeq) acc.style.height = "0px"; });
+  };
+  /* 動き（閉じる時）：まず画面だけを一番上（タイトル・タブが見える位置）まで滑らせて、
+     止まってから畳む。畳む移動とスクロールの移動を同時にやると重なってカクつくので、
+     一度に動かすのは一つだけにする。 */
   const startY = window.scrollY;
-  if (startY < 4) return;
+  if (startY < 4){ collapse(); return; }
   const t0 = performance.now(), dur = 480;
   (function step(now){
+    if (seq !== closeSeq) return;
     const p = Math.min(1, (now - t0) / dur);
     const e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
     window.scrollTo(0, startY * (1 - e));
     if (p < 1) requestAnimationFrame(step);
+    else collapse();
   })(t0);
 }
 function resetDetail(){
   openAnchor = null;
+  closeSeq++;
   clearTimeout(detailTimer);
   accEl().style.height = "0px";
 }function saveKarte(){
