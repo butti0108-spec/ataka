@@ -7,34 +7,43 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif; font-size:16px; color:#222; background:#f4f6f8; line-height:1.6; }
-  .wrap { max-width:640px; margin:0 auto; background:#fff; min-height:100vh; }
-  header { background:#17456e; color:#fff; padding:16px; }
+  .wrap { max-width:640px; margin:0 auto; background:#f2f3f5; min-height:100vh; }
+  header { background:#1D2C4D; color:#fff; padding:16px; }
   header .shop { font-size:19px; font-weight:bold; line-height:1.4; }
   header .sub { font-size:14px; opacity:.85; margin-top:2px; }
-  .tabs { display:flex; border-bottom:2px solid #17456e; }
-  .tabs button { flex:1; padding:13px 4px; font-size:16px; background:#e8eef4; border:none; cursor:pointer; color:#17456e; font-weight:bold; }
-  .tabs button.active { background:#17456e; color:#fff; }
+  .tabs { display:flex; border-bottom:2px solid #1D2C4D; }
+  .tabs button { flex:1; padding:13px 4px; font-size:16px; background:#e8eef4; border:none; cursor:pointer; color:#1D2C4D; font-weight:bold; }
+  .tabs button.active { background:#1D2C4D; color:#fff; }
   main { padding:16px; }
   .note { font-size:14px; color:#555; }
   /* 進み具合 */
   .steps { display:flex; gap:4px; margin-bottom:18px; }
   .steps div { flex:1; text-align:center; font-size:13px; padding:7px 2px; border-radius:6px; background:#eef1f4; color:#777; }
-  .steps div.on { background:#17456e; color:#fff; font-weight:bold; }
-  .steps div.done { background:#bcd2e6; color:#17456e; }
-  h2.sec { font-size:19px; color:#17456e; border-left:6px solid #17456e; padding-left:10px; margin:20px 0 12px; }
+  .steps div.on { background:#1D2C4D; color:#fff; font-weight:bold; }
+  .steps div.done { background:#bcd2e6; color:#1D2C4D; }
+  h2.sec { font-size:19px; color:#1D2C4D; border-left:6px solid #1D2C4D; padding-left:10px; margin:20px 0 12px; }
   h2.sec:first-child { margin-top:4px; }
-  /* コース */
-  .course { border:2px solid #d6dee6; border-radius:10px; padding:14px; margin-bottom:12px; cursor:pointer; }
-  .course:active { background:#f0f5fa; }
-  .course.sel { border-color:#17456e; background:#eef4fa; }
-  .course .cname { font-size:17px; font-weight:bold; }
-  .course .cmeta { margin-top:4px; color:#444; }
-  .course .price { font-size:18px; font-weight:bold; color:#17456e; }
-  .badge { display:inline-block; background:#e8a13a; color:#fff; font-size:13px; font-weight:bold; border-radius:4px; padding:1px 8px; margin-left:8px; vertical-align:2px; }
+  /* コース（レゼルバ予約トップの型：白カード／写真左／価格太字＋分数グレー／緑ピルボタン右下） */
+  .course { border:1px solid #e3e6e9; border-radius:10px; padding:14px; margin-bottom:12px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+  .course.sel { border-color:#1D2C4D; }
+  .course .crow { display:flex; gap:14px; align-items:flex-start; }
+  .course .thumb { width:96px; height:96px; border-radius:8px; object-fit:cover; flex:0 0 auto; }
+  .course .cinfo { flex:1; min-width:0; }
+  .course .cname { font-size:17px; font-weight:bold; line-height:1.5; color:#222; }
+  .course .priceline { margin-top:6px; }
+  .course .price { font-size:18px; font-weight:bold; color:#222; }
+  .course .mins { font-size:14px; color:#888; margin-left:8px; }
+  .badge-ap { display:inline-block; vertical-align:2px; margin-left:8px; font-size:11.5px; font-weight:bold; color:#1D2C4D; border:1.5px solid #1D2C4D; border-radius:999px; padding:1px 9px; white-space:nowrap; }
+  .course .anote { margin-top:8px; font-size:13.5px; color:#666; }
+  .course .cfoot { text-align:right; margin-top:10px; }
+  .book-btn { display:inline-block; min-height:44px; padding:10px 34px; font-size:15.5px; font-weight:bold; border:none; border-radius:999px; background:#46B4A0; color:#fff; cursor:pointer; }
+  .book-btn:active { opacity:.85; }
+  /* 選択中サマリー */
+  .summary { background:#eef1f6; border:1.5px solid #1D2C4D; border-radius:8px; padding:10px 12px; font-weight:bold; color:#1D2C4D; font-size:15.5px; }
   /* 日付 */
   .dates { display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; }
   .dates button { flex:0 0 auto; width:62px; padding:9px 0; border:2px solid #d6dee6; border-radius:10px; background:#fff; font-size:15px; cursor:pointer; line-height:1.35; }
-  .dates button.sel { border-color:#17456e; background:#17456e; color:#fff; font-weight:bold; }
+  .dates button.sel { border-color:#1D2C4D; background:#1D2C4D; color:#fff; font-weight:bold; }
   .dates button .dw-sat { color:#2a6db0; } .dates button .dw-sun { color:#c0392b; }
   .dates button.sel .dw-sat, .dates button.sel .dw-sun { color:#fff; }
   /* 時間枠 */
@@ -44,13 +53,13 @@
   .slots button .mk.mid { color:#c07f13; }
   .slots button:disabled { background:#f0f0f0; color:#aaa; cursor:default; border-color:#e2e2e2; }
   .slots button:disabled .mk { color:#c0392b; }
-  .slots button.sel { border-color:#17456e; background:#17456e; color:#fff; }
+  .slots button.sel { border-color:#1D2C4D; background:#1D2C4D; color:#fff; }
   .slots button.sel .mk { color:#fff; }
   .legend { font-size:14px; color:#555; margin-top:10px; }
   /* ボタン */
-  .btn { display:block; width:100%; padding:15px; font-size:17px; font-weight:bold; border:none; border-radius:10px; background:#17456e; color:#fff; cursor:pointer; margin-top:16px; }
+  .btn { display:block; width:100%; padding:15px; font-size:17px; font-weight:bold; border:none; border-radius:10px; background:#1D2C4D; color:#fff; cursor:pointer; margin-top:16px; }
   .btn:disabled { background:#b9c6d2; cursor:default; }
-  .btn.sub { background:#fff; color:#17456e; border:2px solid #17456e; }
+  .btn.sub { background:#fff; color:#1D2C4D; border:2px solid #1D2C4D; }
   .btn.sm { padding:11px; font-size:16px; }
   /* フォーム */
   label.fl { display:block; font-weight:bold; margin:16px 0 6px; }
@@ -64,27 +73,27 @@
   .confirm dt { color:#666; font-size:15px; }
   .confirm dd { font-weight:bold; }
   .done-box { text-align:center; padding:26px 6px; }
-  .done-box .big { font-size:22px; font-weight:bold; color:#17456e; margin-bottom:10px; }
+  .done-box .big { font-size:22px; font-weight:bold; color:#1D2C4D; margin-bottom:10px; }
   .hidden { display:none; }
   /* 管理画面 */
   .bk { border:2px solid #d6dee6; border-radius:10px; padding:12px 14px; margin-bottom:10px; }
-  .bk .tm { font-size:18px; font-weight:bold; color:#17456e; }
+  .bk .tm { font-size:18px; font-weight:bold; color:#1D2C4D; }
   .bk .who { font-weight:bold; }
   .cust { border:2px solid #d6dee6; border-radius:10px; padding:13px 14px; margin-bottom:10px; cursor:pointer; width:100%; text-align:left; background:#fff; font-size:16px; }
   .cust:active { background:#f0f5fa; }
   .cust .nm { font-weight:bold; font-size:17px; }
   .cust .last { font-size:14px; color:#555; }
-  .detail { border:2px solid #17456e; border-radius:10px; padding:14px; background:#fbfcfe; }
+  .detail { border:2px solid #1D2C4D; border-radius:10px; padding:14px; background:#fbfcfe; }
   .lastbox { background:#eef4fa; border-radius:8px; padding:10px 12px; margin:12px 0; }
-  .lastbox .lb-t { font-size:14px; color:#17456e; font-weight:bold; }
+  .lastbox .lb-t { font-size:14px; color:#1D2C4D; font-weight:bold; }
   .lastbox .lb-v { font-size:17px; font-weight:bold; }
   .hist { border-top:1px solid #dde4ea; padding:8px 0; }
   .hist .hd { color:#555; font-size:15px; }
   .mic-row { display:flex; gap:10px; align-items:center; margin-top:10px; }
-  .mic { padding:12px 18px; font-size:16px; font-weight:bold; border:none; border-radius:24px; background:#17456e; color:#fff; cursor:pointer; }
+  .mic { padding:12px 18px; font-size:16px; font-weight:bold; border:none; border-radius:24px; background:#1D2C4D; color:#fff; cursor:pointer; }
   .mic.rec { background:#c0392b; }
   .mic:disabled { background:#b9c6d2; }
-  .remind { border:2px dashed #17456e; border-radius:10px; padding:14px; background:#fbfcfe; }
+  .remind { border:2px dashed #1D2C4D; border-radius:10px; padding:14px; background:#fbfcfe; }
   .remind .mail { background:#fff; border:1px solid #d6dee6; border-radius:8px; padding:12px; margin-top:10px; }
   footer { padding:18px 16px 26px; text-align:center; font-size:14px; color:#888; }
 </style>
@@ -109,14 +118,14 @@
     <!-- STEP1 コース -->
     <section id="step1">
       <h2 class="sec">① コースを選んでください</h2>
+      <p class="note" style="margin-bottom:12px;">ご希望のコースの「予約する」を押してください。そのまま日時の選択に進みます。</p>
       <div id="course-list"></div>
-      <button class="btn" id="to-step2" disabled onclick="goStep(2)">日時を選ぶへ進む</button>
     </section>
 
     <!-- STEP2 日時 -->
     <section id="step2" class="hidden">
       <h2 class="sec">② 日時を選んでください</h2>
-      <p class="note" id="sel-course-note"></p>
+      <p class="summary" id="sel-course-note" style="margin-bottom:12px;"></p>
       <div class="dates" id="date-list" style="margin-top:10px;"></div>
       <div class="slots" id="slot-list"></div>
       <p class="legend">◎ 空きあり ／ ○ 残りわずか ／ △ 残り1枠 ／ × 満席・受付終了</p>
@@ -127,7 +136,7 @@
     <!-- STEP3 お客様情報 -->
     <section id="step3" class="hidden">
       <h2 class="sec">③ お客様情報を入力してください</h2>
-      <p class="note" id="sel-slot-note"></p>
+      <p class="summary" id="sel-slot-note"></p>
       <label class="fl" for="f-name">お名前 <span class="req">必須</span></label>
       <input class="fi" id="f-name" type="text" placeholder="例）山田 花子" autocomplete="name">
       <label class="fl" for="f-tel">電話番号 <span class="req">必須</span></label>
@@ -166,11 +175,15 @@
 <script>
 /* ================= データ（後でスプレッドシート連携に差し替え可能な構造） ================= */
 const COURSES = [
-  { id:"c1", name:"根本改善コース（スポーツ整体＋自宅エクササイズ提案付）", minutes:100, price:13900, pop:"" },
-  { id:"c2", name:"首肩集中コース", minutes:50, price:6900, pop:"人気No.1" },
-  { id:"c3", name:"腰回り集中コース", minutes:50, price:6900, pop:"人気No.2" },
-  { id:"c4", name:"オーダーメイド整体（当日相談で決める）", minutes:50, price:6900, pop:"" },
-  { id:"c5", name:"時短ケア（平日12時〜15時開始限定）", minutes:30, price:5000, pop:"" }
+  { id:"c1", name:"プロアスリート コンディショニング体験コース", minutes:100, price:13000, pop:"", note:"", img:"assets/reserva_menu_235521253.png", fb:"" },
+  { id:"c2", name:"個別症状徹底解決コース", minutes:80, price:11000, pop:"", note:"", img:"assets/reserva_menu_809753860.png", fb:"" },
+  { id:"c3", name:"【初めての方にオススメ】感動体験トライアルコース", minutes:60, price:9000, pop:"", note:"", img:"assets/reserva_menu_108947896.png", fb:"" },
+  { id:"c4", name:"ツライ部分に集中・ポイントケアコース", minutes:50, price:6500, pop:"", note:"", img:"assets/reserva_menu_1887304067.png", fb:"" },
+  { id:"c5", name:"only U-23コース", minutes:20, price:3500, pop:"", note:"", img:"", fb:"U-23" },
+  { id:"c6", name:"美容鍼 プレミアムコース 100本", minutes:50, price:16000, pop:"", note:"承認制", img:"", fb:"鍼" },
+  { id:"c7", name:"美容鍼 スタンダードコース 50本", minutes:40, price:11000, pop:"", note:"承認制", img:"", fb:"鍼" },
+  { id:"c8", name:"美容鍼 トライアルコース 20本", minutes:30, price:5500, pop:"", note:"承認制", img:"", fb:"鍼" },
+  { id:"c9", name:"リカバリーコンプレッションブーツ（Normatec）", minutes:20, price:3000, pop:"", note:"承認制", img:"", fb:"圧" }
 ];
 const CUSTOMERS = [
   { id:"u1", name:"山田花子（サンプル）", tel:"090-0000-1111", mail:"hanako@example.jp",
@@ -236,12 +249,19 @@ function renderCourses(){
   COURSES.forEach(c=>{
     const d = document.createElement("div");
     d.className = "course" + (state.course===c.id ? " sel" : "");
-    d.innerHTML = '<div class="cname">'+c.name+(c.pop ? '<span class="badge">'+c.pop+'</span>' : "")+'</div>'
-      + '<div class="cmeta">'+c.minutes+'分　<span class="price">'+fmtPrice(c.price)+'</span>（税込）</div>';
-    d.onclick = ()=>{
+    const thumb = c.img
+      ? '<img class="thumb" src="'+c.img+'" alt="'+c.name+'">'
+      : '';
+    d.innerHTML = '<div class="crow">' + thumb
+      + '<div class="cinfo"><div class="cname">'+c.name+(c.pop ? '<span class="badge-ap">'+c.pop+'</span>' : "")+(c.note ? '<span class="badge-ap">'+c.note+'</span>' : "")+'</div>'
+      + '<div class="priceline"><span class="price">'+fmtPrice(c.price)+'</span><span class="mins">'+c.minutes+'分</span></div>'
+      + (c.note ? '<div class="anote">※ 承認制コースです。ご予約後にサロンから確認のご連絡をいたします</div>' : "")
+      + '</div></div>'
+      + '<div class="cfoot"><button type="button" class="book-btn">予約する</button></div>';
+    d.querySelector(".book-btn").onclick = ()=>{
       state.course = c.id;
-      document.getElementById("to-step2").disabled = false;
       renderCourses();
+      goStep(2);
     };
     box.appendChild(d);
   });
@@ -296,11 +316,11 @@ function goStep(n){
   });
   if (n===2){
     const c = courseById(state.course);
-    document.getElementById("sel-course-note").textContent = "選択中："+c.name+"（"+c.minutes+"分／"+fmtPrice(c.price)+"）";
+    document.getElementById("sel-course-note").textContent = "選択中のコース："+c.name+"（"+c.minutes+"分）"+fmtPrice(c.price);
   }
   if (n===3){
     const c = courseById(state.course);
-    document.getElementById("sel-slot-note").textContent = "選択中："+fmtDate(state.date)+" "+state.time+"〜 ／ "+c.name;
+    document.getElementById("sel-slot-note").textContent = fmtDate(state.date)+" "+state.time+"〜 ／ "+c.name+"（"+c.minutes+"分）"+fmtPrice(c.price);
   }
   window.scrollTo(0,0);
 }
@@ -320,6 +340,7 @@ function submitInfo(){
     ["メール", mail],
     ["ご要望", memo || "（なし）"]
   ];
+  if (c.note){ rows.push(["ご注意", "承認制コースです。ご予約後にサロンから確認のご連絡をいたします"]); }
   const html = rows.map(r=>"<dt>"+r[0]+"</dt><dd>"+r[1]+"</dd>").join("");
   document.getElementById("confirm-list").innerHTML = html;
   document.getElementById("done-list").innerHTML = html;
@@ -328,7 +349,6 @@ function submitInfo(){
 function finishBooking(){ goStep(5); }
 function resetBooking(){
   state.course = null; state.time = "";
-  document.getElementById("to-step2").disabled = true;
   document.getElementById("to-step3").disabled = true;
   ["f-name","f-tel","f-mail","f-memo"].forEach(id=>{ document.getElementById(id).value=""; });
   state.date = days[0]; state.dateStr = dateKey(days[0]);
