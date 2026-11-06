@@ -157,10 +157,10 @@
     <!-- STEP4 確認 -->
     <section id="step4" class="hidden">
       <h2 class="sec">④ 内容をご確認ください</h2>
+      <div id="mock-note" class="mock-note hidden">内部連携はまだ完了していません。<br>確認用のため、実際のご予約は完了しません。</div>
       <div class="confirm"><dl id="confirm-list"></dl></div>
       <button class="btn" onclick="finishBooking()">この内容で予約する</button>
       <button class="btn sub" onclick="goStep(3)">← 入力に戻る</button>
-      <div id="mock-note" class="mock-note hidden">内部連携はまだ完了していません。<br>確認用のため、実際のご予約は完了しません。</div>
     </section>
 
     <!-- STEP5 完了 -->
@@ -327,7 +327,21 @@ function goStep(n){
     const c = courseById(state.course);
     document.getElementById("sel-slot-note").textContent = fmtDate(state.date)+" "+state.time+"〜 ／ "+c.name+"（"+c.minutes+"分）"+fmtPrice(c.price);
   }
-  window.scrollTo(0,0);
+  /* 動き：ステップが切り替わるのと同時に、画面は一番上へ1回のスライドで戻る（瞬間移動はしない） */
+  glideToTop();
+}
+let glideTimer = null;
+function glideToTop(){
+  const startY = window.scrollY;
+  if (startY < 4){ window.scrollTo(0,0); return; }
+  const t0 = performance.now(), dur = 480;
+  clearInterval(glideTimer);
+  glideTimer = setInterval(()=>{
+    const p = Math.min(1, (performance.now() - t0) / dur);
+    const e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
+    window.scrollTo(0, startY * (1 - e));
+    if (p >= 1) clearInterval(glideTimer);
+  }, 16);
 }
 function submitInfo(){
   const name = document.getElementById("f-name").value.trim();
@@ -355,7 +369,8 @@ function submitInfo(){
 function finishBooking(){
   const n = document.getElementById("mock-note");
   n.classList.remove("hidden");
-  n.scrollIntoView({ behavior:"smooth", block:"center" });
+  /* 注意は確認画面の先頭に出し、画面は先頭へ1回のスライドで戻る（出した後に追いかけて寄せない） */
+  glideToTop();
 }
 function resetBooking(){
   state.course = null; state.time = "";
