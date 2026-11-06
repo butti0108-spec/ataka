@@ -270,7 +270,7 @@ function openDetail(id, anchor){
   acc.style.transition = "";
   requestAnimationFrame(()=>{ acc.style.height = inner.offsetHeight + "px"; });
   clearTimeout(detailTimer);
-  detailTimer = setTimeout(()=>{ if (openAnchor === anchor) acc.style.height = "auto"; }, 420);
+  detailTimer = setTimeout(()=>{ if (openAnchor === anchor){ acc.style.height = "auto"; anchor.scrollIntoView({behavior:"smooth", block:"start"}); } }, 420);
   setTimeout(()=>{ anchor.scrollIntoView({behavior:"smooth", block:"start"}); }, 80);
 }
 function closeDetail(){
