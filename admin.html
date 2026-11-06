@@ -282,26 +282,18 @@ function openDetail(id, anchor){
   void acc.offsetHeight;
   acc.style.transition = "";
   clearTimeout(detailTimer);
-  /* 動き：行が一番上へ上がる動きと開く動きを1つの連続動作にする。
-     最後の行は、開く前の状態では物理的に一番上まで上がれない（下に余白が無い）ため、
-     開きながら上がりきる。行は常に上方向にだけ動き、逆行も跳ねもしない。 */
-  const rectTop = anchor.getBoundingClientRect().top;
-  const startY = window.scrollY;
-  const targetY = startY + rectTop;
-  if (Math.abs(rectTop) < 8){
-    requestAnimationFrame(()=>{ acc.style.height = inner.offsetHeight + "px"; });
-    detailTimer = setTimeout(()=>{ if (openAnchor === anchor) acc.style.height = "auto"; }, 420);
-    return;
-  }
+  /* 動き：開くと同時に、画面はページを開いた時の初期状態（スクロール一番上）へ
+     1回のスライドで戻る。タブや見出しが画面の外へ押し出される形にはしない。 */
   requestAnimationFrame(()=>{ acc.style.height = inner.offsetHeight + "px"; });
   detailTimer = setTimeout(()=>{ if (openAnchor === anchor) acc.style.height = "auto"; }, 470);
-  const t0 = performance.now(), dur = 520;
+  const startY = window.scrollY;
+  if (startY < 4) return;
+  const t0 = performance.now(), dur = 500;
   (function step(now){
     if (openAnchor !== anchor) return;
     const p = Math.min(1, (now - t0) / dur);
     const e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
-    const maxY = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo(0, Math.min(startY + (targetY - startY) * e, maxY));
+    window.scrollTo(0, startY * (1 - e));
     if (p < 1) requestAnimationFrame(step);
   })(t0);
 }
