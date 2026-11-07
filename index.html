@@ -425,6 +425,23 @@ function glideToField(anchor){
       });
     }
   });
+  /* キーボードが開き切ったタイミングでもう一度合わせ直す。
+     ブラウザ側がキーボードに合わせて画面を寄せる動きが後から効くと、
+     先に寄せた位置が上書きされて欄が中途半端な位置に残るため、
+     「見える高さが変わった」合図を受けて、最後にこちらが合わせる */
+  if (window.visualViewport){
+    let vvTimer = null;
+    window.visualViewport.addEventListener("resize", ()=>{
+      clearTimeout(vvTimer);
+      vvTimer = setTimeout(()=>{
+        const a = document.activeElement;
+        if (a && ids.includes(a.id)){
+          const label = document.querySelector('label[for="'+a.id+'"]') || a;
+          glideToField(label);
+        }
+      }, 120);
+    });
+  }
 })();
 
 </script>
