@@ -19,6 +19,8 @@
   main { padding:16px; }
   .note { font-size:14px; color:#555; }
   /* 進み具合 */
+  /* 短いステップ（確認・完了）でも進捗バーが画面の一番上まで届くよう、表示領域の高さを確保する */
+  #view-book { min-height:100vh; }
   .steps { display:flex; gap:4px; margin-bottom:18px; }
   .steps div { flex:1; text-align:center; font-size:13px; padding:7px 2px; border-radius:6px; background:#eef1f4; color:#777; }
   .steps div.on { background:#1D2C4D; color:#fff; font-weight:bold; }
@@ -327,19 +329,22 @@ function goStep(n){
     const c = courseById(state.course);
     document.getElementById("sel-slot-note").textContent = fmtDate(state.date)+" "+state.time+"〜 ／ "+c.name+"（"+c.minutes+"分）"+fmtPrice(c.price);
   }
-  /* 動き：ステップが切り替わるのと同時に、画面は一番上へ1回のスライドで戻る（瞬間移動はしない） */
+  /* 動き：ステップが切り替わるのと同時に、進捗バーのところまで1回のスライドで戻る
+     （ヘッダーは毎回見なくてよいので、一番上までは戻らない。瞬間移動もしない） */
   glideToTop();
 }
 let glideTimer = null;
 function glideToTop(){
+  const bar = document.getElementById("steps-bar");
   const startY = window.scrollY;
-  if (startY < 4){ window.scrollTo(0,0); return; }
+  const targetY = bar ? Math.round(bar.getBoundingClientRect().top + startY) : 0;
+  if (Math.abs(targetY - startY) < 4){ window.scrollTo(0, targetY); return; }
   const t0 = performance.now(), dur = 480;
   clearInterval(glideTimer);
   glideTimer = setInterval(()=>{
     const p = Math.min(1, (performance.now() - t0) / dur);
     const e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
-    window.scrollTo(0, startY * (1 - e));
+    window.scrollTo(0, startY + (targetY - startY) * e);
     if (p >= 1) clearInterval(glideTimer);
   }, 16);
 }
@@ -369,7 +374,7 @@ function submitInfo(){
 function finishBooking(){
   const n = document.getElementById("mock-note");
   n.classList.remove("hidden");
-  /* 注意は確認画面の先頭に出し、画面は先頭へ1回のスライドで戻る（出した後に追いかけて寄せない） */
+  /* 注意は確認画面の先頭に出し、画面は進捗バーのところへ1回のスライドで戻る（出した後に追いかけて寄せない） */
   glideToTop();
 }
 function resetBooking(){
