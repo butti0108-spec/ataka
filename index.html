@@ -21,6 +21,8 @@
   /* 進み具合 */
   /* 短いステップ（確認・完了）でも進捗バーが画面の一番上まで届くよう、表示領域の高さを確保する */
   #view-book { min-height:100vh; }
+  /* 入力ステップは、最後の入力欄でも画面の一番上まで上げられるよう、下に余白を持つ */
+  #step3 { padding-bottom:60vh; }
   .steps { display:flex; gap:4px; margin-bottom:18px; }
   .steps div { flex:1; text-align:center; font-size:13px; padding:7px 2px; border-radius:6px; background:#eef1f4; color:#777; }
   .steps div.on { background:#1D2C4D; color:#fff; font-weight:bold; }
@@ -385,6 +387,45 @@ function resetBooking(){
   renderCourses(); renderDates(); renderSlots();
   goStep(1);
 }
+
+/* 入力欄の動き：入力して次へ進むたびに、次の入力欄が画面の一番上に来るよう1回のスライドで寄せる。
+   スマホでは下の欄がキーボードに隠れるため、お客様に自分でスクロールさせない。
+   キーボードの「次へ」でも、欄をタップしても、Enterでも、フォーカスが移れば同じ動きになる */
+let fieldGlideTimer = null;
+function glideToField(anchor){
+  const startY = window.scrollY;
+  const targetY = Math.max(0, Math.round(anchor.getBoundingClientRect().top + startY) - 10);
+  if (Math.abs(targetY - startY) < 4) return;
+  const t0 = performance.now(), dur = 480;
+  clearInterval(fieldGlideTimer);
+  fieldGlideTimer = setInterval(()=>{
+    const p = Math.min(1, (performance.now() - t0) / dur);
+    const e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
+    window.scrollTo(0, startY + (targetY - startY) * e);
+    if (p >= 1) clearInterval(fieldGlideTimer);
+  }, 16);
+}
+(function(){
+  const ids = ["f-name","f-tel","f-mail","f-memo"];
+  ids.forEach((id, i)=>{
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("focus", ()=>{
+      const label = document.querySelector('label[for="'+id+'"]') || el;
+      /* キーボードが開く時間を待ってから寄せる（開く前の位置で計算するとずれる） */
+      setTimeout(()=>glideToField(label), 350);
+    });
+    if (el.tagName === "INPUT"){
+      el.addEventListener("keydown", (ev)=>{
+        if (ev.key === "Enter"){
+          ev.preventDefault();
+          const next = document.getElementById(ids[i+1]);
+          if (next) next.focus();
+        }
+      });
+    }
+  });
+})();
 
 </script>
 <script>
