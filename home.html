@@ -150,10 +150,10 @@ section{position:relative;}
 .btn-outline-navy{border:1.5px solid var(--navy);color:var(--navy);padding:11px 28px;font-size:14px;margin-top:16px;background:#fff;}
 .link-collection{max-width:940px;margin:56px auto 0;}
 .link-collection h3{text-align:center;font-size:18px;color:var(--navy);letter-spacing:.16em;margin-bottom:26px;}
-.link-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;list-style:none;}
-.link-grid a{display:flex;align-items:center;justify-content:center;min-height:52px;background:#fff;border:1.5px solid var(--line);border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;color:var(--navy);letter-spacing:.04em;text-align:center;padding:4px 8px;transition:border-color .2s ease,background .2s ease;}
+.link-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;list-style:none;}
+.link-grid a{display:flex;align-items:center;justify-content:center;min-height:60px;background:#fff;border:1.5px solid var(--line);border-radius:8px;text-decoration:none;font-size:16px;font-weight:700;color:var(--navy);letter-spacing:.04em;text-align:center;padding:4px 8px;transition:border-color .2s ease,background .2s ease;}
 .link-grid a:hover{border-color:var(--navy);background:rgba(255,255,255,.6);}
-.link-grid a small{display:block;font-size:10.5px;color:var(--muted);font-weight:400;letter-spacing:.02em;}
+.link-grid a small{display:block;font-size:12px;color:var(--muted);font-weight:400;letter-spacing:.02em;}
 
 /* ---------- ACCESS ---------- */
 .access-flex{display:flex;gap:44px;align-items:stretch;max-width:940px;margin:0 auto;}
@@ -255,6 +255,10 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
   .profile-photo img{width:260px;height:347px;}
   .act-grid{grid-template-columns:1fr;}
   .link-grid{grid-template-columns:repeat(2,1fr);}
+  .link-grid li:last-child{grid-column:1/-1;}
+  /* スマホでは見出しとアカウント名を縦に積む（横並びだと最小幅が広がり、枠からはみ出すため） */
+  .link-grid a{flex-direction:column;gap:2px;}
+  .link-grid a small{font-size:11px;}
   .access-flex{flex-direction:column;}
   .access-photo{flex:none;}
   .book-pill{top:12px;right:12px;padding:10px 20px;font-size:13.5px;}
@@ -523,9 +527,8 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
       </article>
     </div>
     <div class="link-collection">
-      <h3 class="rv">公開リンク集</h3>
+      <h3 class="rv">その他の公開リンク</h3>
       <ul class="link-grid">
-        <li class="rv"><a href="https://atakayusuke.blog/" target="_blank" rel="noopener">公式ブログ</a></li>
         <li class="rv"><a href="https://line.me/R/ti/p/@ulg4697j" target="_blank" rel="noopener">LINE公式アカウント</a></li>
         <li class="rv"><a href="https://www.instagram.com/atakayusuke/" target="_blank" rel="noopener">Instagram<small>@atakayusuke</small></a></li>
         <li class="rv"><a href="https://www.instagram.com/lulu_conditioning_salon/" target="_blank" rel="noopener">Instagram（サロン）<small>@lulu_conditioning_salon</small></a></li>
