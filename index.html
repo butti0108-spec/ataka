@@ -427,21 +427,28 @@ function glideToTop(){
   }, 16);
 }
 function validTel(v){ return /^0\d{9,10}$/.test(v.replace(/[^0-9]/g, "")); }
-function validMail(v){
+function telError(v){
+  if (!v) return "電話番号を入力してください。";
+  if (!validTel(v)) return "正しい電話番号をご記入ください。";
+  return "";
+}
+function mailError(v){
   /* メールアドレスの決まりに合わせる：半角の印字できる文字だけ（全角・日本語・スペースは不可）。
      @は1つだけ。@の前は英数字と記号が使えるが、ドットの先頭・末尾・連続は不可。
-     @の後はドットで区切られた英数字とハイフンの並びで、最後は2文字以上 */
-  if (!/^[\x21-\x7E]+$/.test(v)) return false;
-  const parts = v.split("@");
-  if (parts.length !== 2) return false;
-  const local = parts[0], domain = parts[1];
-  if (!/^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~.]+$/.test(local)) return false;
-  if (local.startsWith(".") || local.endsWith(".") || local.includes("..")) return false;
-  if (!/^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(domain)) return false;
-  const labels = domain.split(".");
-  if (labels.some(l => !l || l.startsWith("-") || l.endsWith("-"))) return false;
-  return labels[labels.length - 1].length >= 2;
+     @の後はドットで区切られた英数字とハイフンの並びで、最後は2文字以上。
+     ダメな時は「なぜダメか」を返す（お客様に考えさせないため、理由を言葉で出す） */
+  if (!v) return "メールアドレスを入力してください。";
+  if (!/^[\x21-\x7E]+$/.test(v)) return "半角で入力してください。全角の文字やスペースは使えません。";
+  const parts0 = v.split("@");
+  if (parts0.length !== 2 || !parts0[0] || !parts0[1]) return "「@」が正しく入っていません。";
+  const local0 = parts0[0], domain0 = parts0[1];
+  if (!/^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~.]+$/.test(local0)) return "「@」の前に、使えない文字が入っています。";
+  if (local0.startsWith(".") || local0.endsWith(".") || local0.includes("..")) return "ドットの位置をご確認ください。ドットは続けて打てません。";
+  if (!/^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(domain0) || domain0.split(".").some(l => !l || l.startsWith("-") || l.endsWith("-"))) return "「@」の後ろの形をご確認ください。ドットが続いていないかも見てください。";
+  if (domain0.split(".").pop().length < 2) return "「@」の後ろの、最後の部分をご確認ください。";
+  return "";
 }
+function validMail(v){ return mailError(v) === ""; }
 function setErr(id, bad){
   const inp = document.getElementById("f-" + id), msg = document.getElementById("e-" + id);
   inp.classList.toggle("invalid", bad);
@@ -453,8 +460,12 @@ function submitInfo(){
   const tel  = document.getElementById("f-tel").value.trim();
   const mail = document.getElementById("f-mail").value.trim();
   const badName = setErr("name", !name);
-  const badTel  = setErr("tel",  !validTel(tel));
-  const badMail = setErr("mail", !validMail(mail));
+  const tMsg = telError(tel);
+  if (tMsg) document.getElementById("e-tel").textContent = tMsg;
+  const badTel  = setErr("tel",  !!tMsg);
+  const mMsg = mailError(mail);
+  if (mMsg) document.getElementById("e-mail").textContent = mMsg;
+  const badMail = setErr("mail", !!mMsg);
   if (badName || badTel || badMail){
     const firstBad = badName ? "f-name" : (badTel ? "f-tel" : "f-mail");
     const label = document.querySelector('label[for="' + firstBad + '"]');
