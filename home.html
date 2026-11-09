@@ -693,6 +693,7 @@ body.nav-open .nav-scrim{pointer-events:auto;}
     setNav(true);
   });
   closeBtn.addEventListener('click', function(){ setNav(false); });
+
   scrim.addEventListener('click', function(){ setNav(false); });
 
   /* Handle position: a hidden extra — LONG-PRESS the tab to pick it up
@@ -841,11 +842,38 @@ body.nav-open .nav-scrim{pointer-events:auto;}
     });
   });
 
-  /* No flick/swipe open-close (removed 2026-11-10): repeated field reports
-     of the panel closing mid-tap traced back to gesture interpretation —
-     a flick is undiscoverable anyway, and every accidental close costs more
-     than the gesture ever saved. Open = tab tap. Close = the close button,
-     a tap on the page side, or scrolling the page. */
+  /* Swipe / flick open & close (safeguarded form, restored 2026-11-10).
+     The rapid-tap self-closing traced to overlapping glides, not to flicks;
+     with the glide generation guard in place, flicks return — hardened:
+     a flick must cross 48px within 350ms (a slow drifting press is a tap),
+     and a gesture that starts on a menu item is never read as a flick. */
+  var gStart = null;
+  document.addEventListener('pointerdown', function(e){
+    var onNav = e.target.closest && (e.target.closest('.side-nav') || e.target.closest('.nav-handle') || e.target.closest('.nav-scrim'));
+    var onEdge = !navIsOpen() && (document.body.classList.contains('panel-left')
+      ? e.clientX <= 26
+      : (window.innerWidth - e.clientX <= 26));
+    var onItem = !!(e.target.closest && e.target.closest('.sn-item'));
+    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false, t: Date.now(), onItem: onItem } : null;
+  }, { passive: true });
+  document.addEventListener('pointermove', function(e){
+    if(!gStart || gStart.used){ return; }
+    if(typeof hPress !== 'undefined' && hPress && hPress.picked){ return; }
+    if(Date.now() - gStart.t > 350){ gStart.used = true; return; }
+    if(gStart.onItem){ gStart.used = true; return; }
+    var dx = e.clientX - gStart.x;
+    var dy = e.clientY - gStart.y;
+    if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5){ return; }
+    if(document.body.classList.contains('panel-left')){
+      if(dx > 0 && !navIsOpen()){ setNav(true); gStart.used = true; }
+      else if(dx < 0 && navIsOpen()){ setNav(false); gStart.used = true; }
+    } else {
+      if(dx < 0 && !navIsOpen()){ setNav(true); gStart.used = true; }
+      else if(dx > 0 && navIsOpen()){ setNav(false); gStart.used = true; }
+    }
+  }, { passive: true });
+  document.addEventListener('pointerup', function(){ gStart = null; }, { passive: true });
+  document.addEventListener('pointercancel', function(){ gStart = null; }, { passive: true });
 
   /* Close on page scroll: a scroll gesture on the page side is NOT intercepted —
      the page starts moving natively from the first pixel, and the panel closes
