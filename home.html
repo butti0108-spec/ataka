@@ -773,12 +773,14 @@ body.nav-open .nav-scrim{pointer-events:auto;}
       var r2 = handle.getBoundingClientRect();
       var toLeft = (r2.left + r2.width / 2) < vw2 / 2;
       handle.classList.add('snapping');
-      handle.classList.remove('peek-l', 'peek-r');
       handle.style.left = (toLeft ? 0 : vw2 - r2.width) + 'px';
       setTimeout(function(){
         handle.classList.remove('snapping');
         handle.classList.toggle('on-left', toLeft);
         document.body.classList.toggle('panel-left', toLeft);
+        /* The corner preview comes off only AFTER the docked side is set,
+           so the shape never flashes the opposite side during the settle. */
+        handle.classList.remove('peek-l', 'peek-r');
         handle.style.left = '';
         handle.style.right = '';
         storeHandlePos();
