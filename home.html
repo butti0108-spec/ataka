@@ -681,10 +681,11 @@ body.nav-open .nav-scrim{pointer-events:auto;}
   var scrim = document.getElementById('navScrim');
   function navIsOpen(){ return document.body.classList.contains('nav-open'); }
   var navOpenedAt = 0;
+  var navAnchorY = 0;
   function setNav(open){
     document.body.classList.toggle('nav-open', open);
     handle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if(open){ navOpenedAt = Date.now(); }
+    if(open){ navOpenedAt = Date.now(); navAnchorY = window.scrollY; }
   }
   setNav(false);
   handle.addEventListener('click', function(){
@@ -877,10 +878,16 @@ body.nav-open .nav-scrim{pointer-events:auto;}
      alongside it (one continuous motion, no dead gesture, no re-swipe).
      Excluded: the item-tap animation (spyLock/animating) and the brief layout
      shift while the body padding settles after opening (grace period). */
+  /* Scroll-close fires only on a REAL scroll (24px+ from the anchor).
+     Browsers nudge scrollY by a few px on their own (address-bar show/hide,
+     scroll anchoring, a trailing event after the item glide) — those used
+     to close the panel right after a tap. The anchor follows the position
+     while a glide runs, so it always rests at the arrival point. */
   window.addEventListener('scroll', function(){
-    if(!navIsOpen() || spyLock || animating){ return; }
-    if(Date.now() - navOpenedAt < 500){ return; }
-    setNav(false);
+    if(!navIsOpen()){ return; }
+    if(spyLock || animating){ navAnchorY = window.scrollY; return; }
+    if(Date.now() - navOpenedAt < 500){ navAnchorY = window.scrollY; return; }
+    if(Math.abs(window.scrollY - navAnchorY) >= 24){ setNav(false); }
   }, { passive: true });
 
   /* Scroll-spy (improvement over the original: highlight follows manual scrolling) */
