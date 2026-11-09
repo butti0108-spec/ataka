@@ -239,13 +239,13 @@ body{padding-left:26px;padding-right:26px;}
 .side-nav .sn-item.book-link.active .dot{background:#fff;}
 .side-nav .sn-foot{padding:14px 20px 18px;border-top:1px solid var(--line);font-family:var(--en);font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--muted);}
 /* Slim tab handle shown while the sidebar is closed */
-.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;z-index:79;width:30px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;z-index:79;width:30px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:none;opacity:0;pointer-events:none;transition:opacity .3s ease;}
 body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 /* While dragging, the tab lifts off the edge so it reads as "picked up / movable" */
 .nav-handle{transition:opacity .3s ease,box-shadow .18s ease,translate .18s ease;cursor:grab;}
 .nav-handle.dragging{box-shadow:-12px 8px 32px rgba(19,30,53,.55);translate:-6px 0;scale:1.09;cursor:grabbing;}
 /* Docked to the left edge instead: shape, shadow and touch strip mirror */
-.nav-handle.on-left{left:0;right:auto;border-radius:0 10px 10px 0;box-shadow:3px 0 14px rgba(19,30,53,.3);}
+.nav-handle.on-left{left:0;right:auto;border-radius:0 10px 10px 0;box-shadow:none;}
 .nav-handle.on-left::before{left:auto;right:-16px;}
 .nav-handle.on-left.dragging{box-shadow:12px 8px 32px rgba(19,30,53,.55);translate:6px 0;}
 /* Gliding to the chosen edge after a drop */
