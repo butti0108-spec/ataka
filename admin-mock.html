@@ -11,7 +11,7 @@
   header { background:#1D2C4D; color:#fff; padding:16px; }
   header .logo { height:30px; display:block; }
   header .sub { font-size:14px; opacity:.85; margin-top:8px; }
-  .tabs { display:flex; border-bottom:2px solid #1D2C4D; }
+  .tabs { display:flex; border-bottom:2px solid #1D2C4D; position:sticky; top:0; z-index:60; background:#fff; }
   .tabs button { flex:1; padding:13px 4px; font-size:16px; background:#e9ecf2; border:none; cursor:pointer; color:#1D2C4D; font-weight:bold; }
   .tabs button.active { background:#1D2C4D; color:#fff; }
   @media (max-width:480px){ .tabs button{ font-size:14px; padding:13px 1px; white-space:nowrap; } }
@@ -115,9 +115,10 @@
 
   <nav class="tabs">
     
-    <button type="button" id="tab-cust" onclick="showTab('cust')">顧客リスト</button>
+    
     <button type="button" id="tab-cal" class="active" onclick="showTab('cal')">カレンダー</button>
     <button type="button" id="tab-blk" onclick="showTab('blk')">受付停止</button>
+    <button type="button" id="tab-cust" onclick="showTab('cust')">顧客リスト</button>
   </nav>
 
 
@@ -455,7 +456,7 @@ const CAL_BOOKINGS = [
   {date:"2026-11-04",time:"10:30",customerId:"u3",courseId:"c4"},{date:"2026-11-04",time:"13:00",customerId:"u1",courseId:"c2"},{date:"2026-11-04",time:"18:30",customerId:"u2",courseId:"c3"},
   {date:"2026-11-05",time:"11:00",customerId:"u4",courseId:"c1"},{date:"2026-11-05",time:"15:30",customerId:"u1",courseId:"c4"},
   {date:"2026-11-07",time:"10:00",customerId:"u2",courseId:"c2"},{date:"2026-11-07",time:"12:00",customerId:"u3",courseId:"c2"},{date:"2026-11-07",time:"14:30",customerId:"u1",courseId:"c1"},{date:"2026-11-07",time:"17:00",customerId:"u4",courseId:"c5"},
-  {date:"2026-11-09",time:"10:00",customerId:"u1",courseId:"c4"},{date:"2026-11-09",time:"13:00",customerId:"u2",courseId:"c2"},{date:"2026-11-09",time:"16:30",customerId:"u3",courseId:"c4"},
+  {date:"2026-11-09",time:"10:00",customerId:"u1",courseId:"c4",opts:[["鍼治療（BODY）",2000]]},{date:"2026-11-09",time:"13:00",customerId:"u2",courseId:"c2"},{date:"2026-11-09",time:"16:30",customerId:"u3",courseId:"c4",opts:[["【治療効果持続】ホームケア・セルフエクササイズ指導《宿題》提案",1000]]},
   {date:"2026-11-11",time:"10:00",customerId:"u4",courseId:"c1"},{date:"2026-11-11",time:"13:30",customerId:"u1",courseId:"c2"},{date:"2026-11-11",time:"17:30",customerId:"u2",courseId:"c3"},{date:"2026-11-11",time:"19:30",customerId:"u3",courseId:"c2"},
   {date:"2026-11-12",time:"11:00",customerId:"u2",courseId:"c4"},{date:"2026-11-12",time:"15:00",customerId:"u1",courseId:"c1"},
   {date:"2026-11-14",time:"10:00",customerId:"u3",courseId:"c2"},{date:"2026-11-14",time:"11:30",customerId:"u4",courseId:"c5"},{date:"2026-11-14",time:"13:30",customerId:"u1",courseId:"c2"},{date:"2026-11-14",time:"15:30",customerId:"u2",courseId:"c1"},{date:"2026-11-14",time:"17:30",customerId:"u3",courseId:"c4"},
@@ -539,9 +540,9 @@ function renderCal(){
           if (bl.start){
             const [sh,sm] = bl.start.split(":").map(Number), [eh,em] = bl.end.split(":").map(Number);
             const top = ((sh+sm/60)-H0)*PX, hgt = Math.max(N<=5 ? 60 : 46, ((eh+em/60)-(sh+sm/60))*PX);
-            col += '<div class="w-ev blk" style="top:'+top+'px;height:'+hgt+'px"><span class="et">'+(N<=5 ? "受付停止" : "停止")+'</span>' + (N<=5 ? '<span class="en2">'+bl.memo+"</span>" : "") + "</div>";
+            col += '<div class="w-ev blk" style="cursor:pointer;top:'+top+'px;height:'+hgt+'px" onclick="goDay(\''+ds+'\')"><span class="et">'+(N<=5 ? "受付停止" : "停止")+'</span>' + (N<=5 ? '<span class="en2">'+bl.memo+"</span>" : "") + "</div>";
           } else {
-            col += '<div class="w-ev blk" style="top:0;height:'+HGT+'px"><span class="et">'+(N<=5 ? "終日 受付停止" : "終日 停止")+'</span>' + (N<=5 ? '<span class="en2">'+bl.memo+"</span>" : "") + "</div>";
+            col += '<div class="w-ev blk" style="cursor:pointer;top:0;height:'+HGT+'px" onclick="goDay(\''+ds+'\')"><span class="et">'+(N<=5 ? "終日 受付停止" : "終日 停止")+'</span>' + (N<=5 ? '<span class="en2">'+bl.memo+"</span>" : "") + "</div>";
           }
         });
       }
@@ -575,7 +576,7 @@ function renderCal(){
     if (!isClosed(cur) && !list.length && !blkOn(ds).length) h = '<p class="note">この日の予約はありません。</p>';
     list.forEach(b=>{
       const co = courseById(b.courseId), cu = custById(b.customerId);
-      h += '<button type="button" class="cust" onclick="openDetail(\''+cu.id+'\', this)"><span class="tm">'+b.time+"〜"+endTime(b.time, co.minutes)+'</span>　<span class="nm">'+cu.name+'</span><br><span class="last">'+co.name+"（"+co.minutes+"分／"+fmtPrice(co.price)+"）</span></button>";
+      h += '<button type="button" class="cust" onclick="openDetail(\''+cu.id+'\', this)"><span class="tm">'+b.time+"〜"+endTime(b.time, co.minutes)+'</span>　<span class="nm">'+cu.name+'</span><br><span class="last">'+co.name+"（"+co.minutes+"分／"+fmtPrice(co.price)+"）</span>" + (b.opts ? '<br><span class="last">オプション：'+b.opts.map(o=>o[0]).join("、")+"（+"+fmtPrice(b.opts.reduce((sm,o)=>sm+o[1],0))+"）</span>" : "") + "</button>";
     });
     blkOn(ds).forEach(bl=>{
       h += '<div class="blk-row">受付停止：'+(bl.start ? bl.start+"〜"+bl.end : "終日")+"（"+bl.memo+"）</div>";
