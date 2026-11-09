@@ -534,7 +534,7 @@ function renderCal(){
     const last = new Date(start); last.setDate(start.getDate()+N-1);
     title.textContent = (start.getMonth()+1)+"/"+start.getDate()+" 〜 "+(last.getMonth()+1)+"/"+last.getDate();
     const H0=10, H1=22, PX=58, HGT=(H1-H0)*PX;
-    const gridCols = 'grid-template-columns:'+(N===7?36:40)+'px repeat('+N+',1fr);';
+    const gridCols = 'grid-template-columns:46px repeat('+N+',1fr);';
     let switcher = '<div class="cal-days"><span class="cd-label">表示する日数</span>';
     [3,5,7].forEach(n=>{ switcher += '<button type="button" class="'+(n===N?"active":"")+'" onclick="setCalDays('+n+')">'+n+'日</button>'; });
     switcher += '</div>';
