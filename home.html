@@ -242,19 +242,19 @@ body{padding-left:26px;padding-right:26px;}
 .nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;z-index:79;width:30px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:none;opacity:0;pointer-events:none;transition:opacity .3s ease;}
 body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 /* While dragging, the tab lifts off the edge so it reads as "picked up / movable" */
-.nav-handle{transition:opacity .3s ease,box-shadow .18s ease,translate .18s ease;cursor:grab;}
+.nav-handle{transition:opacity .3s ease,box-shadow .18s ease,translate .18s ease,scale .18s ease;cursor:grab;}
 /* The lift is neutral — no sideways lean, no directional shadow — so
    nothing ever "faces the other way" at the midpoint or at the dock. */
-.nav-handle.dragging{box-shadow:0 10px 32px rgba(19,30,53,.5);scale:1.09;cursor:grabbing;}
+.nav-handle.dragging{box-shadow:0 10px 32px rgba(19,30,53,.5);scale:1.09;cursor:grabbing;border-radius:14px;}
+.nav-handle.snapping{border-radius:14px;}
 /* Docked to the left edge instead: shape, shadow and touch strip mirror */
 .nav-handle.on-left{left:0;right:auto;border-radius:0 10px 10px 0;box-shadow:none;}
 .nav-handle.on-left::before{left:auto;right:-16px;}
-.nav-handle.on-left.dragging{box-shadow:0 10px 32px rgba(19,30,53,.5);}
+.nav-handle.on-left.dragging{box-shadow:0 10px 32px rgba(19,30,53,.5);border-radius:14px;}
+.nav-handle.on-left.snapping{border-radius:14px;}
 /* Gliding to the chosen edge after a drop */
-.nav-handle.snapping{transition:left .25s ease,top .25s ease,opacity .3s ease,box-shadow .18s ease,translate .18s ease;}
+.nav-handle.snapping{transition:left .25s ease,top .25s ease,opacity .3s ease,box-shadow .18s ease,translate .18s ease,scale .18s ease;border-radius:14px;}
 /* While dragging, the corners preview the side it is about to dock to */
-.nav-handle.peek-l{border-radius:0 10px 10px 0;}
-.nav-handle.peek-r{border-radius:10px 0 0 10px;}
 /* When the handle is docked left, the panel itself lives on the left */
 body.panel-left .side-nav{right:auto;left:0;border-left:none;border-right:1px solid var(--line);box-shadow:6px 0 24px rgba(19,30,53,.08),0 -6px 18px rgba(19,30,53,.06);transform:translateX(-106%);}
 body.panel-left.nav-open .side-nav{transform:none;}
@@ -757,9 +757,9 @@ body.nav-open .nav-scrim{pointer-events:auto;}
     handle.style.left = Math.round(cx - 15) + 'px';
     handle.style.right = 'auto';
     handle.style.top = Math.round(cy) + 'px';
-    var peekL = cx < vw / 2;
-    handle.classList.toggle('peek-l', peekL);
-    handle.classList.toggle('peek-r', !peekL);
+    /* While carried, the tab is a neutral pill (rounded on both sides):
+       the old midpoint corner-flip read as the tab "turning around"
+       mid-journey. The docked face forms only when it sticks. */
   });
   function endHandlePress(){
     if(hHoldTimer){ clearTimeout(hHoldTimer); hHoldTimer = null; }
@@ -779,9 +779,6 @@ body.nav-open .nav-scrim{pointer-events:auto;}
         handle.classList.remove('snapping');
         handle.classList.toggle('on-left', toLeft);
         document.body.classList.toggle('panel-left', toLeft);
-        /* The corner preview comes off only AFTER the docked side is set,
-           so the shape never flashes the opposite side during the settle. */
-        handle.classList.remove('peek-l', 'peek-r');
         handle.style.left = '';
         handle.style.right = '';
         storeHandlePos();
