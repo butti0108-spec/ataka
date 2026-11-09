@@ -215,7 +215,7 @@ footer .mock-note{margin:26px auto 0;max-width:640px;font-size:12px;color:rgba(2
 .book-pill{position:fixed;top:16px;right:16px;z-index:70;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:.14em;padding:13px 26px;border-radius:999px;box-shadow:0 4px 16px rgba(19,30,53,.35);border:1.5px solid rgba(255,255,255,.55);transition:right .38s ease,opacity .25s ease;}
 .book-pill:hover{opacity:.88;}
 
-/* ---------- FIXED SIDE NAV (dedicated sidebar strip, openable / closable) ---------- */
+/* ---------- FIXED SIDE NAV (one form on all devices: handle + slide-in panel) ---------- */
 :root{--sidew:188px;}
 body{transition:padding-right .38s ease,padding-left .38s ease;}
 .side-nav{position:fixed;top:0;right:0;height:100%;width:var(--sidew);z-index:80;background:#fff;border-left:1px solid var(--line);box-shadow:-6px 0 24px rgba(19,30,53,.08);display:flex;flex-direction:column;transform:translateX(106%);visibility:hidden;transition:transform .38s ease,visibility 0s linear .38s;}
@@ -239,12 +239,9 @@ body:not(.nav-open){padding-left:26px;padding-right:26px;}
 body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 .nav-handle .h-ico{font-size:15px;line-height:1;}
 .nav-handle .h-txt{writing-mode:vertical-rl;font-size:15px;font-weight:700;letter-spacing:.32em;}
-/* Scrim (mobile only, when the panel is open) */
+/* Scrim (all widths, when the panel is open): tap the page side to close */
 .nav-scrim{position:fixed;inset:0;background:rgba(19,30,53,.45);z-index:78;opacity:0;pointer-events:none;transition:opacity .3s ease;}
-@media (min-width:900px){
-  body.nav-open{padding-right:var(--sidew);}
-  body.nav-open .book-pill{right:calc(var(--sidew) + 16px);}
-}
+body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:899px){
@@ -282,9 +279,6 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
   .book-pill{top:12px;right:12px;padding:10px 20px;font-size:13.5px;}
   .cta-band{padding:48px 0;}
   .blog-band{padding:54px 0;}
-  /* Mobile: sidebar becomes a slide-in panel; closed = slim right-edge handle only */
-  .side-nav{width:min(264px,82vw);}
-  body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
 }
 @media (prefers-reduced-motion:reduce){
   .rv{opacity:1;transform:none;transition:none;}
@@ -654,31 +648,22 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
   var spyLock = false;
   var animating = false;
 
-  /* Sidebar open/close state: desktop defaults open, mobile defaults closed */
+  /* Sidebar open/close state: ONE form on every device (settled 2026-11-09) —
+     closed by default with the right-edge handle showing; opens from the handle;
+     selecting an item never closes it; it closes only via the close button or a
+     tap on the page side (scrim). No per-device defaults, no reset on resize. */
   var handle = document.getElementById('navHandle');
   var closeBtn = document.getElementById('navClose');
   var scrim = document.getElementById('navScrim');
-  function isMobile(){ return window.innerWidth < 900; }
   function navIsOpen(){ return document.body.classList.contains('nav-open'); }
   function setNav(open){
     document.body.classList.toggle('nav-open', open);
     handle.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
-  var wasMobile = isMobile();
-  setNav(!wasMobile);
+  setNav(false);
   handle.addEventListener('click', function(){ setNav(true); });
   closeBtn.addEventListener('click', function(){ setNav(false); });
   scrim.addEventListener('click', function(){ setNav(false); });
-  var resizeTick = false;
-  window.addEventListener('resize', function(){
-    if(resizeTick){ return; }
-    resizeTick = true;
-    requestAnimationFrame(function(){
-      resizeTick = false;
-      var m = isMobile();
-      if(m !== wasMobile){ wasMobile = m; setNav(!m); }
-    });
-  });
 
   function setActive(id){
     buttons.forEach(function(b){
