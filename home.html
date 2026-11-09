@@ -74,6 +74,10 @@ section{position:relative;}
 .reason-card h3{font-size:21px;font-weight:700;margin:14px 0 12px;letter-spacing:.04em;line-height:1.55;}
 .reason-card p{font-size:14.5px;line-height:1.95;color:rgba(255,255,255,.88);}
 .reason-rule{height:2px;background:var(--navy);opacity:.25;margin-top:64px;transform-origin:left;}
+.reason-more{margin-top:22px;border:1px solid rgba(29,44,77,.35);border-radius:4px;padding:26px 28px;display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+.reason-more h4{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px;letter-spacing:.03em;}
+.reason-more p{font-size:14px;line-height:1.9;}
+.reason-more .rm-item + .rm-item{border-left:1px solid rgba(29,44,77,.13);padding-left:28px;}
 
 /* ---------- VOICE (Google reviews frame) ---------- */
 .voice{background:var(--beige);}
@@ -244,6 +248,8 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
   .site-head{padding:8px 14px;}
   .site-head .site-head-logo{height:34px;}
   .reason-grid{grid-template-columns:1fr;}
+  .reason-more{grid-template-columns:1fr;gap:20px;padding:22px 20px;}
+  .reason-more .rm-item + .rm-item{border-left:none;padding-left:0;border-top:1px solid rgba(29,44,77,.13);padding-top:20px;}
   .method-list{grid-template-columns:repeat(2,1fr);}
   .method-list li:last-child{grid-column:1/-1;}
   .flow-list{grid-template-columns:1fr;gap:18px;}
@@ -320,16 +326,16 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
         <h3>完全予約制・施術者1人・ベッド1台</h3>
         <p>担当が毎回同じだから、体の変化を継続して追えます。</p>
       </article>
-      <article class="reason-card rv">
-        <p class="no">REASON 04</p>
-        <h3>旧園舎を活かした施設</h3>
+    </div>
+    <div class="reason-more rv">
+      <div class="rm-item">
+        <h4>旧園舎を活かした施設</h4>
         <p>幼稚園の旧園舎を活かしたサロン。元教室の施術スペースに加え、お遊戯室とグラウンドがあり、施術前後の動作確認やトレーニングまで行えます。</p>
-      </article>
-      <article class="reason-card rv rv-d1">
-        <p class="no">REASON 05</p>
-        <h3>医療機関との連携</h3>
+      </div>
+      <div class="rm-item">
+        <h4>医療機関との連携</h4>
         <p>近隣の整形外科、ペインクリニック、内科・心療内科・精神科の医師と連携。施術の範囲を超える場合は、適切な医療へつなぎます。</p>
-      </article>
+      </div>
     </div>
     <div class="reason-rule rv"></div>
   </div>
