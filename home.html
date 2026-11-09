@@ -723,6 +723,27 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
     });
   });
 
+  /* Swipe / drag to open & close: flick on phone, drag on PC (pointer events cover both).
+     Start zones: the handle, the open panel, the scrim, or within 26px of the right edge.
+     A plain tap has ~0 movement, so tap behaviour is untouched. Vertical-dominant
+     movement is treated as page scroll and never hijacks the gesture. */
+  var gStart = null;
+  document.addEventListener('pointerdown', function(e){
+    var onNav = e.target.closest && (e.target.closest('.side-nav') || e.target.closest('.nav-handle') || e.target.closest('.nav-scrim'));
+    var onEdge = !navIsOpen() && (window.innerWidth - e.clientX <= 26);
+    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false } : null;
+  }, { passive: true });
+  document.addEventListener('pointermove', function(e){
+    if(!gStart || gStart.used){ return; }
+    var dx = e.clientX - gStart.x;
+    var dy = e.clientY - gStart.y;
+    if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5){ return; }
+    if(dx < 0 && !navIsOpen()){ setNav(true); gStart.used = true; }
+    else if(dx > 0 && navIsOpen()){ setNav(false); gStart.used = true; }
+  }, { passive: true });
+  document.addEventListener('pointerup', function(){ gStart = null; }, { passive: true });
+  document.addEventListener('pointercancel', function(){ gStart = null; }, { passive: true });
+
   /* Scroll-spy (improvement over the original: highlight follows manual scrolling) */
   var spyTick = false;
   function spy(){
