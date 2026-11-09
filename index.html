@@ -72,6 +72,8 @@
   label.fl:first-child { margin-top:4px; }
   input.fi, textarea.fi { width:100%; padding:13px; font-size:16px; border:2px solid #c9d3dd; border-radius:8px; background:#fff; }
   textarea.fi { min-height:110px; }
+  input.fi.invalid { border-color:#b3261e; }
+  .ferr { color:#b3261e; font-size:13px; margin:6px 0 2px; }
   .req { color:#c0392b; font-size:14px; font-weight:bold; }
   /* 確認 */
   .confirm { border:2px solid #d6dee6; border-radius:10px; padding:14px; }
@@ -159,10 +161,13 @@
       <p class="summary" id="sel-slot-note"></p>
       <label class="fl" for="f-name">お名前 <span class="req">必須</span></label>
       <input class="fi" id="f-name" type="text" placeholder="例）山田 花子" autocomplete="name">
+      <p class="ferr hidden" id="e-name">お名前を入力してください。</p>
       <label class="fl" for="f-tel">電話番号 <span class="req">必須</span></label>
       <input class="fi" id="f-tel" type="tel" placeholder="例）090-0000-0000" autocomplete="tel">
+      <p class="ferr hidden" id="e-tel">正しい電話番号をご記入ください。</p>
       <label class="fl" for="f-mail">メールアドレス <span class="req">必須</span></label>
       <input class="fi" id="f-mail" type="email" placeholder="例）hanako@example.jp" autocomplete="email">
+      <p class="ferr hidden" id="e-mail">正しいメールアドレスをご記入ください。</p>
       <p class="note" style="margin-top:6px;">ご予約の確認と、前日のリマインドメールをお送りします。</p>
       <label class="fl" for="f-memo">ご要望・お体の気になる所（任意）</label>
       <textarea class="fi" id="f-memo" style="min-height:80px;" placeholder="例）肩こりがひどいです"></textarea>
@@ -414,11 +419,27 @@ function glideToTop(){
     if (p >= 1) clearInterval(glideTimer);
   }, 16);
 }
+function validTel(v){ return /^0\d{9,10}$/.test(v.replace(/[^0-9]/g, "")); }
+function validMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+function setErr(id, bad){
+  const inp = document.getElementById("f-" + id), msg = document.getElementById("e-" + id);
+  inp.classList.toggle("invalid", bad);
+  msg.classList.toggle("hidden", !bad);
+  return bad;
+}
 function submitInfo(){
   const name = document.getElementById("f-name").value.trim();
   const tel  = document.getElementById("f-tel").value.trim();
   const mail = document.getElementById("f-mail").value.trim();
-  if (!name || !tel || !mail){ alert("お名前・電話番号・メールアドレスを入力してください。"); return; }
+  const badName = setErr("name", !name);
+  const badTel  = setErr("tel",  !validTel(tel));
+  const badMail = setErr("mail", !validMail(mail));
+  if (badName || badTel || badMail){
+    const firstBad = badName ? "f-name" : (badTel ? "f-tel" : "f-mail");
+    const label = document.querySelector('label[for="' + firstBad + '"]');
+    if (label) glideToField(label);
+    return;
+  }
   const c = courseById(state.course);
   const memo = document.getElementById("f-memo").value.trim();
   const rows = [
@@ -476,6 +497,11 @@ function glideToField(anchor){
   ids.forEach((id, i)=>{
     const el = document.getElementById(id);
     if (!el) return;
+    el.addEventListener("input", ()=>{
+      const eid = "e-" + id.replace("f-", "");
+      const msg = document.getElementById(eid);
+      if (msg){ msg.classList.add("hidden"); el.classList.remove("invalid"); }
+    });
     el.addEventListener("focus", ()=>{
       const label = document.querySelector('label[for="'+id+'"]') || el;
       /* キーボードが開く時間を待ってから寄せる（開く前の位置で計算するとずれる） */
