@@ -804,13 +804,20 @@ body.nav-open .nav-scrim{pointer-events:auto;}
 
   function easeInOutCubic(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
 
+  var glideGen = 0;
   function smoothScrollTo(targetY, done){
+    /* Generation token: rapid successive taps start overlapping glides.
+       Only the newest glide may run and clear `animating` — otherwise the
+       first glide to finish re-arms the scroll-close listener while a later
+       glide is still travelling, and the panel closes itself on arrival. */
+    var gen = ++glideGen;
     var startY = window.pageYOffset;
     var dist = targetY - startY;
     var dur = 800;
     var startT = null;
     animating = true;
     function step(ts){
+      if(gen !== glideGen){ return; }
       if(startT === null){ startT = ts; }
       var p = Math.min((ts - startT) / dur, 1);
       window.scrollTo(0, startY + dist * easeInOutCubic(p));
