@@ -219,7 +219,8 @@ footer .mock-note{margin:26px auto 0;max-width:640px;font-size:12px;color:rgba(2
 body{transition:padding-right .38s ease,padding-left .38s ease;}
 .side-nav{position:fixed;top:0;right:0;height:100%;width:var(--sidew);touch-action:none;z-index:80;background:#fff;border-left:1px solid var(--line);box-shadow:-6px 0 24px rgba(19,30,53,.08);display:flex;flex-direction:column;transform:translateX(106%);visibility:hidden;transition:transform .38s ease,visibility 0s linear .38s;}
 body.nav-open .side-nav{transform:none;visibility:visible;transition:transform .38s ease;}
-body:not(.nav-open){padding-left:26px;padding-right:26px;}
+/* The gutter is constant — open or closed, the text never shifts sideways */
+body{padding-left:26px;padding-right:26px;}
 .side-nav .sn-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 12px 12px 20px;border-bottom:1px solid var(--line);}
 .side-nav .sn-title{font-size:13px;font-weight:700;letter-spacing:.26em;color:var(--muted);}
 .sn-close{flex:0 0 auto;min-height:44px;padding:8px 15px;background:#fff;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;font-family:var(--jp);font-size:13.5px;font-weight:700;letter-spacing:.06em;color:var(--navy);transition:border-color .2s ease;}
@@ -234,17 +235,25 @@ body:not(.nav-open){padding-left:26px;padding-right:26px;}
 .side-nav .sn-item.book-link.active .dot{background:#fff;}
 .side-nav .sn-foot{padding:14px 20px 18px;border-top:1px solid var(--line);font-family:var(--en);font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--muted);}
 /* Slim tab handle shown while the sidebar is closed */
-.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;z-index:79;width:30px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;z-index:79;width:30px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;}
 body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 /* While dragging, the tab lifts off the edge so it reads as "picked up / movable" */
 .nav-handle{transition:opacity .3s ease,box-shadow .18s ease,translate .18s ease;cursor:grab;}
-.nav-handle.dragging{box-shadow:-10px 6px 28px rgba(19,30,53,.5);translate:-5px 0;scale:1.05;cursor:grabbing;}
+.nav-handle.dragging{box-shadow:-12px 8px 32px rgba(19,30,53,.55);translate:-6px 0;scale:1.09;cursor:grabbing;}
+/* Docked to the left edge instead: shape, shadow and touch strip mirror */
+.nav-handle.on-left{left:0;right:auto;border-radius:0 10px 10px 0;box-shadow:3px 0 14px rgba(19,30,53,.3);}
+.nav-handle.on-left::before{left:auto;right:-16px;}
+.nav-handle.on-left.dragging{box-shadow:12px 8px 32px rgba(19,30,53,.55);translate:6px 0;}
+/* Gliding to the chosen edge after a drop */
+.nav-handle.snapping{transition:left .25s ease,top .25s ease,opacity .3s ease,box-shadow .18s ease,translate .18s ease;}
 .nav-handle::before{content:"";position:absolute;top:0;bottom:0;left:-16px;width:16px;}
 .nav-handle .h-ico{font-size:15px;line-height:1;}
 .nav-handle .h-txt{writing-mode:vertical-rl;font-size:15px;font-weight:700;letter-spacing:.32em;}
-/* Scrim (all widths, when the panel is open): tap the page side to close */
-.nav-scrim{position:fixed;inset:0;background:rgba(19,30,53,.45);z-index:78;opacity:0;pointer-events:none;transition:opacity .3s ease;}
-body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
+/* Invisible shield (all widths, while the panel is open): no dim layer —
+   the page stays fully readable; the shield only receives the "close"
+   signals (tap on the page side). Scrolling passes through to the page. */
+.nav-scrim{position:fixed;inset:0;background:transparent;z-index:78;pointer-events:none;}
+body.nav-open .nav-scrim{pointer-events:auto;}
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:899px){
@@ -672,49 +681,97 @@ body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
   closeBtn.addEventListener('click', function(){ setNav(false); });
   scrim.addEventListener('click', function(){ setNav(false); });
 
-  /* Handle position: drag the tab up/down to a height that suits you.
-     A tap still opens; a sideways flick still opens (handled by the document
-     gesture below — vertical-dominant movement is reserved for dragging).
-     The dropped position is remembered on this device (as a fraction of the
-     viewport height, so rotation/resize keeps it sensible). */
+  /* Handle position: a hidden extra — LONG-PRESS the tab to pick it up
+     (it pops off the edge), then slide it up/down and let go to drop it.
+     A plain tap opens the panel; a quick brush or drift never moves the tab,
+     so nobody relocates it by accident. The dropped position is remembered
+     on this device (as a fraction of the viewport height). */
   var HANDLE_KEY = 'lulu-nav-handle-pos';
-  function applyHandlePos(frac){
-    if(typeof frac !== 'number' || !(frac > 0) || !(frac < 1)){ return; }
-    handle.style.top = Math.round(frac * window.innerHeight) + 'px';
+  function applyHandlePos(){
+    var raw = null;
+    try { raw = localStorage.getItem(HANDLE_KEY); } catch(e){}
+    if(!raw){ return; }
+    var side = 'r', frac = NaN;
+    try {
+      var parsed = JSON.parse(raw);
+      if(parsed && typeof parsed === 'object'){ side = parsed.s === 'l' ? 'l' : 'r'; frac = parseFloat(parsed.y); }
+    } catch(e){}
+    if(!(frac > 0 && frac < 1)){ frac = parseFloat(raw); }  /* legacy: plain fraction = right side */
+    handle.classList.toggle('on-left', side === 'l');
+    if(frac > 0 && frac < 1){ handle.style.top = Math.round(frac * window.innerHeight) + 'px'; }
   }
-  try { applyHandlePos(parseFloat(localStorage.getItem(HANDLE_KEY))); } catch(e){}
-  var hDrag = null;
+  applyHandlePos();
+  function storeHandlePos(){
+    var r = handle.getBoundingClientRect();
+    var c = r.top + r.height / 2;
+    var data = { s: handle.classList.contains('on-left') ? 'l' : 'r', y: c / window.innerHeight };
+    try { localStorage.setItem(HANDLE_KEY, JSON.stringify(data)); } catch(e){}
+  }
+  var hPress = null;      /* current press: {startX, startY, centerY, picked, maxMove} */
+  var hHoldTimer = null;
   var suppressHandleClickUntil = 0;
+  function pickUpHandle(){
+    if(!hPress || hPress.picked){ return; }
+    hPress.picked = true;
+    handle.classList.add('dragging');
+    try { if(navigator.vibrate){ navigator.vibrate(15); } } catch(e){}
+  }
   handle.addEventListener('pointerdown', function(e){
-    hDrag = { startX: e.clientX, startY: e.clientY, centerY: handle.getBoundingClientRect().top + handle.offsetHeight / 2, moved: false, dead: false };
+    hPress = { startX: e.clientX, startY: e.clientY,
+               centerY: handle.getBoundingClientRect().top + handle.offsetHeight / 2,
+               picked: false, maxMove: 0 };
+    if(hHoldTimer){ clearTimeout(hHoldTimer); }
+    hHoldTimer = setTimeout(pickUpHandle, 380);
   });
   handle.addEventListener('pointermove', function(e){
-    if(!hDrag || hDrag.dead){ return; }
-    var dy = e.clientY - hDrag.startY;
-    var dx = e.clientX - hDrag.startX;
-    if(!hDrag.moved){
-      /* Engage only on a clear vertical move; a sideways drift is a flick's
-         territory, and a small drift during a tap must stay a tap. */
-      if(Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) >= 12){ hDrag.dead = true; return; }
-      if(Math.abs(dy) < 16 || Math.abs(dy) < Math.abs(dx) * 1.5){ return; }
+    if(!hPress){ return; }
+    var dy = e.clientY - hPress.startY;
+    var dx = e.clientX - hPress.startX;
+    var dist = Math.max(Math.abs(dx), Math.abs(dy));
+    if(dist > hPress.maxMove){ hPress.maxMove = dist; }
+    if(!hPress.picked){
+      /* Moving before the hold completes cancels the pick-up:
+         that was a tap, a flick, or a scroll attempt — not a move. */
+      if(dist > 10){ if(hHoldTimer){ clearTimeout(hHoldTimer); hHoldTimer = null; } }
+      return;
     }
-    hDrag.moved = true;
-    handle.classList.add('dragging');
-    var vh = window.innerHeight;
-    var c = Math.max(76, Math.min(vh - 76, hDrag.centerY + dy));
-    handle.style.top = Math.round(c) + 'px';
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var cy = Math.max(76, Math.min(vh - 76, e.clientY));
+    var cx = Math.max(15, Math.min(vw - 15, e.clientX));
+    handle.style.left = Math.round(cx - 15) + 'px';
+    handle.style.right = 'auto';
+    handle.style.top = Math.round(cy) + 'px';
   });
-  function endHandleDrag(){
+  function endHandlePress(){
+    if(hHoldTimer){ clearTimeout(hHoldTimer); hHoldTimer = null; }
+    if(!hPress){ return; }
     handle.classList.remove('dragging');
-    if(hDrag && hDrag.moved){
+    if(hPress.picked || hPress.maxMove > 10){
+      /* Picked up (even if dropped in place) or brushed aside: not a tap. */
       suppressHandleClickUntil = Date.now() + 400;
-      var c = handle.getBoundingClientRect().top + handle.offsetHeight / 2;
-      try { localStorage.setItem(HANDLE_KEY, String(c / window.innerHeight)); } catch(e){}
     }
-    hDrag = null;
+    if(hPress.picked){
+      var vw2 = window.innerWidth;
+      var r2 = handle.getBoundingClientRect();
+      var toLeft = (r2.left + r2.width / 2) < vw2 / 2;
+      handle.classList.add('snapping');
+      handle.style.left = (toLeft ? 0 : vw2 - r2.width) + 'px';
+      setTimeout(function(){
+        handle.classList.remove('snapping');
+        handle.classList.toggle('on-left', toLeft);
+        handle.style.left = '';
+        handle.style.right = '';
+        storeHandlePos();
+      }, 280);
+    }
+    hPress = null;
   }
-  handle.addEventListener('pointerup', endHandleDrag);
-  handle.addEventListener('pointercancel', function(){ handle.classList.remove('dragging'); hDrag = null; });
+  handle.addEventListener('pointerup', endHandlePress);
+  handle.addEventListener('pointercancel', function(){
+    if(hHoldTimer){ clearTimeout(hHoldTimer); hHoldTimer = null; }
+    handle.classList.remove('dragging');
+    hPress = null;
+  });
 
   function setActive(id){
     buttons.forEach(function(b){
@@ -771,6 +828,9 @@ body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
   }, { passive: true });
   document.addEventListener('pointermove', function(e){
     if(!gStart || gStart.used){ return; }
+    /* While the handle is picked up (long-press drag), this gesture belongs
+       to the drag — never read it as an open/close flick. */
+    if(typeof hPress !== 'undefined' && hPress && hPress.picked){ return; }
     var dx = e.clientX - gStart.x;
     var dy = e.clientY - gStart.y;
     if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5){ return; }
