@@ -380,6 +380,10 @@ function renderSlots(){
         state.time = t;
         document.getElementById("to-step3").disabled = false;
         renderSlots();
+        /* 空き枠を選んだら、次に見る所（オプションの見出し）まで1回のスライドで寄せる。
+           お客様に「次はどこへ行くのか」を自分で探させない（入力欄の寄せと同じ考え方） */
+        const oh = document.querySelector("#step2 .subh");
+        if (oh) setTimeout(()=>glideToField(oh), 60);
       };
       box.appendChild(b);
     });
