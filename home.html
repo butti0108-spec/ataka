@@ -218,14 +218,14 @@ footer .mock-note{margin:26px auto 0;max-width:640px;font-size:12px;color:rgba(2
 /* ---------- FIXED SIDE NAV (one form on all devices: handle + slide-in panel) ---------- */
 :root{--sidew:188px;}
 body{transition:padding-right .38s ease,padding-left .38s ease;}
-.side-nav{position:fixed;top:0;right:0;height:100%;width:var(--sidew);z-index:80;background:#fff;border-left:1px solid var(--line);box-shadow:-6px 0 24px rgba(19,30,53,.08);display:flex;flex-direction:column;transform:translateX(106%);visibility:hidden;transition:transform .38s ease,visibility 0s linear .38s;}
+.side-nav{position:fixed;top:0;right:0;height:100%;width:var(--sidew);touch-action:none;z-index:80;background:#fff;border-left:1px solid var(--line);box-shadow:-6px 0 24px rgba(19,30,53,.08);display:flex;flex-direction:column;transform:translateX(106%);visibility:hidden;transition:transform .38s ease,visibility 0s linear .38s;}
 body.nav-open .side-nav{transform:none;visibility:visible;transition:transform .38s ease;}
 body:not(.nav-open){padding-left:26px;padding-right:26px;}
 .side-nav .sn-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 12px 12px 20px;border-bottom:1px solid var(--line);}
 .side-nav .sn-title{font-size:13px;font-weight:700;letter-spacing:.26em;color:var(--muted);}
 .sn-close{flex:0 0 auto;min-height:44px;padding:8px 15px;background:#fff;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;font-family:var(--jp);font-size:13.5px;font-weight:700;letter-spacing:.06em;color:var(--navy);transition:border-color .2s ease;}
 .sn-close:hover{border-color:var(--navy);}
-.side-nav .sn-items{display:flex;flex-direction:column;gap:2px;margin:auto 0;padding:12px 10px;}
+.side-nav .sn-items{display:flex;flex-direction:column;gap:2px;margin:auto 0;padding:12px 10px;overscroll-behavior:contain;}
 .side-nav .sn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:52px;padding:0 14px;background:transparent;border:none;border-radius:10px;cursor:pointer;font-family:var(--round);font-size:16px;font-weight:700;letter-spacing:.04em;color:var(--navy);text-align:left;transition:background .2s ease;}
 .side-nav .sn-item:hover{background:var(--navy-soft);}
 .side-nav .dot{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--navy);background:transparent;flex:0 0 auto;transition:background .2s ease;}
@@ -235,7 +235,7 @@ body:not(.nav-open){padding-left:26px;padding-right:26px;}
 .side-nav .sn-item.book-link.active .dot{background:#fff;}
 .side-nav .sn-foot{padding:14px 20px 18px;border-top:1px solid var(--line);font-family:var(--en);font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--muted);}
 /* Slim tab handle shown while the sidebar is closed */
-.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:79;width:46px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;z-index:79;width:46px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;}
 body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 /* While dragging, the tab lifts off the edge so it reads as "picked up / movable" */
 .nav-handle{transition:opacity .3s ease,box-shadow .18s ease,translate .18s ease;cursor:grab;}
@@ -243,7 +243,7 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 .nav-handle .h-ico{font-size:15px;line-height:1;}
 .nav-handle .h-txt{writing-mode:vertical-rl;font-size:15px;font-weight:700;letter-spacing:.32em;}
 /* Scrim (all widths, when the panel is open): tap the page side to close */
-.nav-scrim{position:fixed;inset:0;background:rgba(19,30,53,.45);z-index:78;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.nav-scrim{position:fixed;inset:0;background:rgba(19,30,53,.45);z-index:78;opacity:0;pointer-events:none;transition:opacity .3s ease;touch-action:none;}
 body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
 
 /* ---------- RESPONSIVE ---------- */
@@ -670,6 +670,8 @@ body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
   });
   closeBtn.addEventListener('click', function(){ setNav(false); });
   scrim.addEventListener('click', function(){ setNav(false); });
+  /* PC: a mouse wheel over the page side is the same "let me read" signal */
+  scrim.addEventListener('wheel', function(){ if(navIsOpen()){ setNav(false); } }, { passive: true });
 
   /* Handle position: drag the tab up/down to a height that suits you.
      A tap still opens; a sideways flick still opens (handled by the document
@@ -760,12 +762,18 @@ body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
   document.addEventListener('pointerdown', function(e){
     var onNav = e.target.closest && (e.target.closest('.side-nav') || e.target.closest('.nav-handle') || e.target.closest('.nav-scrim'));
     var onEdge = !navIsOpen() && (window.innerWidth - e.clientX <= 26);
-    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false } : null;
+    var onScrim = !!(e.target.closest && e.target.closest('.nav-scrim'));
+    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false, onScrim: onScrim } : null;
   }, { passive: true });
   document.addEventListener('pointermove', function(e){
     if(!gStart || gStart.used){ return; }
     var dx = e.clientX - gStart.x;
     var dy = e.clientY - gStart.y;
+    /* A vertical scroll gesture on the page side (scrim) means "I want to read
+       the page" — close the panel for it, same as a tap there. */
+    if(gStart.onScrim && navIsOpen() && Math.abs(dy) >= 24 && Math.abs(dy) > Math.abs(dx) * 1.5){
+      setNav(false); gStart.used = true; return;
+    }
     if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5){ return; }
     if(dx < 0 && !navIsOpen()){ setNav(true); gStart.used = true; }
     else if(dx > 0 && navIsOpen()){ setNav(false); gStart.used = true; }
