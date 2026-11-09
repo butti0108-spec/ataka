@@ -234,11 +234,12 @@ body:not(.nav-open){padding-left:26px;padding-right:26px;}
 .side-nav .sn-item.book-link.active .dot{background:#fff;}
 .side-nav .sn-foot{padding:14px 20px 18px;border-top:1px solid var(--line);font-family:var(--en);font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--muted);}
 /* Slim tab handle shown while the sidebar is closed */
-.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;z-index:79;width:46px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.nav-handle{position:fixed;right:0;top:50%;transform:translateY(-50%);touch-action:none;z-index:79;width:30px;min-height:136px;padding:14px 0;background:var(--navy);color:#fff;border:none;border-radius:10px 0 0 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);opacity:0;pointer-events:none;transition:opacity .3s ease;}
 body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 /* While dragging, the tab lifts off the edge so it reads as "picked up / movable" */
 .nav-handle{transition:opacity .3s ease,box-shadow .18s ease,translate .18s ease;cursor:grab;}
 .nav-handle.dragging{box-shadow:-10px 6px 28px rgba(19,30,53,.5);translate:-5px 0;scale:1.05;cursor:grabbing;}
+.nav-handle::before{content:"";position:absolute;top:0;bottom:0;left:-16px;width:16px;}
 .nav-handle .h-ico{font-size:15px;line-height:1;}
 .nav-handle .h-txt{writing-mode:vertical-rl;font-size:15px;font-weight:700;letter-spacing:.32em;}
 /* Scrim (all widths, when the panel is open): tap the page side to close */
@@ -685,12 +686,18 @@ body.nav-open .nav-scrim{opacity:1;pointer-events:auto;}
   var hDrag = null;
   var suppressHandleClickUntil = 0;
   handle.addEventListener('pointerdown', function(e){
-    hDrag = { startY: e.clientY, centerY: handle.getBoundingClientRect().top + handle.offsetHeight / 2, moved: false };
+    hDrag = { startX: e.clientX, startY: e.clientY, centerY: handle.getBoundingClientRect().top + handle.offsetHeight / 2, moved: false, dead: false };
   });
   handle.addEventListener('pointermove', function(e){
-    if(!hDrag){ return; }
+    if(!hDrag || hDrag.dead){ return; }
     var dy = e.clientY - hDrag.startY;
-    if(Math.abs(dy) < 8 && !hDrag.moved){ return; }
+    var dx = e.clientX - hDrag.startX;
+    if(!hDrag.moved){
+      /* Engage only on a clear vertical move; a sideways drift is a flick's
+         territory, and a small drift during a tap must stay a tap. */
+      if(Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) >= 12){ hDrag.dead = true; return; }
+      if(Math.abs(dy) < 16 || Math.abs(dy) < Math.abs(dx) * 1.5){ return; }
+    }
     hDrag.moved = true;
     handle.classList.add('dragging');
     var vh = window.innerHeight;
