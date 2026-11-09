@@ -843,7 +843,10 @@ body.nav-open .nav-scrim{pointer-events:auto;}
     var onEdge = !navIsOpen() && (document.body.classList.contains('panel-left')
       ? e.clientX <= 26
       : (window.innerWidth - e.clientX <= 26));
-    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false, t: Date.now() } : null;
+    /* A gesture that starts on a menu item is a tap, never a flick: quick
+       diagonal drifts on an item must not read as a close-flick. */
+    var onItem = !!(e.target.closest && e.target.closest('.sn-item'));
+    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false, t: Date.now(), onItem: onItem } : null;
   }, { passive: true });
   document.addEventListener('pointermove', function(e){
     if(!gStart || gStart.used){ return; }
@@ -854,6 +857,7 @@ body.nav-open .nav-scrim{pointer-events:auto;}
        drifting finger (a sloppy tap), never a flick — otherwise items
        "sometimes close the panel" when tapped. */
     if(Date.now() - gStart.t > 350){ gStart.used = true; return; }
+    if(gStart.onItem){ gStart.used = true; return; }
     var dx = e.clientX - gStart.x;
     var dy = e.clientY - gStart.y;
     if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5){ return; }
