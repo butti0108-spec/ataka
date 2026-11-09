@@ -315,6 +315,8 @@ let closeSeq = 0;
 function accEl(){ return document.getElementById("detail-acc"); }
 function openDetail(id, anchor){
   const acc = accEl();
+  if (!acc) return;
+  if (glideTimer){ clearInterval(glideTimer); glideTimer = null; }
   if (openAnchor === anchor){ closeDetail(); return; }
   closeSeq++;
   currentCust = custById(id);
@@ -369,7 +371,8 @@ function openDetail(id, anchor){
 }
 function closeDetail(){
   const acc = accEl();
-  if (!openAnchor) return;
+  if (!acc || !openAnchor) return;
+  if (glideTimer){ clearInterval(glideTimer); glideTimer = null; }
   stopMic();
   openAnchor = null;
   clearTimeout(detailTimer);
@@ -507,6 +510,8 @@ function goDay(ds){ const p = ds.split("-").map(Number); calState.cur = new Date
 function renderCal(){
   ["month","week","day"].forEach(v=>document.getElementById("cv-"+v).classList.toggle("active", calState.view===v));
   const body = document.getElementById("cal-body"), title = document.getElementById("cal-title"), cur = calState.cur;
+  const acc0 = accEl();
+  if (acc0 && acc0.parentElement === body){ resetDetail(); document.getElementById("view-cal").after(acc0); }
   if (calState.view==="month"){
     title.textContent = cur.getFullYear()+"年"+(cur.getMonth()+1)+"月";
     const y = cur.getFullYear(), m = cur.getMonth();
