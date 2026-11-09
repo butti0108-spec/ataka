@@ -843,13 +843,17 @@ body.nav-open .nav-scrim{pointer-events:auto;}
     var onEdge = !navIsOpen() && (document.body.classList.contains('panel-left')
       ? e.clientX <= 26
       : (window.innerWidth - e.clientX <= 26));
-    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false } : null;
+    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false, t: Date.now() } : null;
   }, { passive: true });
   document.addEventListener('pointermove', function(e){
     if(!gStart || gStart.used){ return; }
     /* While the handle is picked up (long-press drag), this gesture belongs
        to the drag — never read it as an open/close flick. */
     if(typeof hPress !== 'undefined' && hPress && hPress.picked){ return; }
+    /* A flick is fast. Distance that accumulates slowly is a press with a
+       drifting finger (a sloppy tap), never a flick — otherwise items
+       "sometimes close the panel" when tapped. */
+    if(Date.now() - gStart.t > 350){ gStart.used = true; return; }
     var dx = e.clientX - gStart.x;
     var dy = e.clientY - gStart.y;
     if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5){ return; }
