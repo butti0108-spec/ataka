@@ -65,7 +65,6 @@
   <nav class="tabs">
     <button type="button" id="tab-today" class="active" onclick="showTab('today')">今日の予約</button>
     <button type="button" id="tab-cust" onclick="showTab('cust')">顧客リスト</button>
-    <button type="button" id="tab-remind" onclick="showTab('remind')">リマインドメール</button>
   </nav>
 
   <!-- ============ 今日の予約 ============ -->
@@ -104,15 +103,6 @@
     </div>
   </div>
 
-  <!-- ============ リマインドメール ============ -->
-  <main id="view-remind" class="hidden">
-    <h2 class="sec">前日リマインドメール（自動送信）</h2>
-    <div class="remind">
-      <p>ご予約の前日に、下記のようなメールをお客様へ自動でお送りする仕組みです。文面の名前・日時・コースは、予約台帳から自動で差し込まれます。</p>
-      <div class="mail" id="remind-example"></div>
-      <p class="note" style="margin-top:10px;">※これは表示例（モック）です。実際の送信は本番の仕組みで自動化します。</p>
-    </div>
-  </main>
 
   <footer>試作品（サンプルデータ）<br>表示されているお客様・予約はすべてサンプルです</footer>
 </div>
@@ -176,7 +166,7 @@ function showTab(name){
   currentTab = name;
   stopMic();
   resetDetail();
-  ["today","cust","remind"].forEach(t=>{
+  ["today","cust"].forEach(t=>{
     document.getElementById("view-"+t).classList.toggle("hidden", t!==name);
     document.getElementById("tab-"+t).classList.toggle("active", t===name);
   });
@@ -212,17 +202,11 @@ function renderAdmin(){
     box.appendChild(b);
   });
   renderCustList(CUSTOMERS);
-  /* リマインドメール表示例：先頭のお客様・予約で文面を組み立てる */
-  const bk = BOOKINGS[0], cu = custById(bk.customerId), co = courseById(bk.courseId);
-  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
-  document.getElementById("remind-example").textContent =
-    cu.name.replace("（サンプル）","")+"様、明日"+fmtDate(tomorrow)+" "+bk.time+"から"+endTime(bk.time, co.minutes)+"まで、"+co.name+"のご予約をいただいております。"
-    + " お気をつけてお越しください。 lulu SPORTS CONDITIONING SALON";
 }
 function renderCustList(list){
   const cl = document.getElementById("cust-list");
   const acc = accEl();
-  if (acc.parentElement === cl){ resetDetail(); document.getElementById("view-remind").after(acc); }
+  if (acc.parentElement === cl){ resetDetail(); document.getElementById("view-cust").after(acc); }
   cl.innerHTML = "";
   list.forEach(cu=>{
     const last = cu.visits[0];
