@@ -225,7 +225,7 @@ body.nav-open .side-nav{transform:none;visibility:visible;transition:transform .
 .sn-close{flex:0 0 auto;min-height:44px;padding:8px 15px;background:#fff;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;font-family:var(--jp);font-size:13.5px;font-weight:700;letter-spacing:.06em;color:var(--navy);transition:border-color .2s ease;}
 .sn-close:hover{border-color:var(--navy);}
 .side-nav .sn-items{display:flex;flex-direction:column;gap:2px;margin:auto 0;padding:12px 10px;}
-.side-nav .sn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:52px;padding:0 14px;background:transparent;border:none;border-radius:10px;cursor:pointer;font-family:var(--en);font-size:17px;font-weight:700;letter-spacing:.08em;color:var(--navy);text-align:left;transition:background .2s ease;}
+.side-nav .sn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:52px;padding:0 14px;background:transparent;border:none;border-radius:10px;cursor:pointer;font-family:var(--round);font-size:16px;font-weight:700;letter-spacing:.04em;color:var(--navy);text-align:left;transition:background .2s ease;}
 .side-nav .sn-item:hover{background:var(--navy-soft);}
 .side-nav .dot{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--navy);background:transparent;flex:0 0 auto;transition:background .2s ease;}
 .side-nav .sn-item.active .dot{background:var(--navy);}
@@ -629,15 +629,15 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
     <button type="button" class="sn-close" id="navClose" aria-label="メニューを閉じる">閉じる ✕</button>
   </div>
   <div class="sn-items">
-    <button type="button" class="sn-item" data-target="top"><span class="lbl">TOP</span><span class="dot"></span></button>
-    <button type="button" class="sn-item" data-target="reason"><span class="lbl">REASON</span><span class="dot"></span></button>
-    <button type="button" class="sn-item" data-target="voice"><span class="lbl">VOICE</span><span class="dot"></span></button>
-    <button type="button" class="sn-item" data-target="menu"><span class="lbl">MENU</span><span class="dot"></span></button>
-    <button type="button" class="sn-item" data-target="profile"><span class="lbl">PROFILE</span><span class="dot"></span></button>
-    <button type="button" class="sn-item" data-target="activities"><span class="lbl">ACTIVITIES</span><span class="dot"></span></button>
-    <button type="button" class="sn-item" data-target="access"><span class="lbl">ACCESS</span><span class="dot"></span></button>
-    <button type="button" class="sn-item" data-target="contact"><span class="lbl">CONTACT</span><span class="dot"></span></button>
-    <button type="button" class="sn-item book-link" data-book="1"><span class="lbl">BOOK</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="top"><span class="lbl">トップ</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="reason"><span class="lbl">強み</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="voice"><span class="lbl">お客様の声</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="menu"><span class="lbl">メニュー</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="profile"><span class="lbl">代表プロフィール</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="activities"><span class="lbl">その他の活動</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="access"><span class="lbl">アクセス</span><span class="dot"></span></button>
+    <button type="button" class="sn-item" data-target="contact"><span class="lbl">ご相談・お問い合わせ</span><span class="dot"></span></button>
+    <button type="button" class="sn-item book-link" data-book="1"><span class="lbl">ご予約</span><span class="dot"></span></button>
   </div>
   <p class="sn-foot">lulu</p>
 </nav>
@@ -714,7 +714,6 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
       var el = document.getElementById(id);
       if(!el){ return; }
       setActive(id);
-      if(isMobile() && navIsOpen()){ setNav(false); }
       spyLock = true;
       var y = el.getBoundingClientRect().top + window.pageYOffset;
       smoothScrollTo(Math.max(y, 0), function(){
