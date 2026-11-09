@@ -834,44 +834,11 @@ body.nav-open .nav-scrim{pointer-events:auto;}
     });
   });
 
-  /* Swipe / drag to open & close: flick on phone, drag on PC (pointer events cover both).
-     Start zones: the handle, the open panel, the scrim, or within 26px of the right edge.
-     A plain tap has ~0 movement, so tap behaviour is untouched. Vertical-dominant
-     movement is treated as page scroll and never hijacks the gesture. */
-  var gStart = null;
-  document.addEventListener('pointerdown', function(e){
-    var onNav = e.target.closest && (e.target.closest('.side-nav') || e.target.closest('.nav-handle') || e.target.closest('.nav-scrim'));
-    var onEdge = !navIsOpen() && (document.body.classList.contains('panel-left')
-      ? e.clientX <= 26
-      : (window.innerWidth - e.clientX <= 26));
-    /* A gesture that starts on a menu item is a tap, never a flick: quick
-       diagonal drifts on an item must not read as a close-flick. */
-    var onItem = !!(e.target.closest && e.target.closest('.sn-item'));
-    gStart = (onNav || onEdge) ? { x: e.clientX, y: e.clientY, used: false, t: Date.now(), onItem: onItem } : null;
-  }, { passive: true });
-  document.addEventListener('pointermove', function(e){
-    if(!gStart || gStart.used){ return; }
-    /* While the handle is picked up (long-press drag), this gesture belongs
-       to the drag — never read it as an open/close flick. */
-    if(typeof hPress !== 'undefined' && hPress && hPress.picked){ return; }
-    /* A flick is fast. Distance that accumulates slowly is a press with a
-       drifting finger (a sloppy tap), never a flick — otherwise items
-       "sometimes close the panel" when tapped. */
-    if(Date.now() - gStart.t > 350){ gStart.used = true; return; }
-    if(gStart.onItem){ gStart.used = true; return; }
-    var dx = e.clientX - gStart.x;
-    var dy = e.clientY - gStart.y;
-    if(Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.5){ return; }
-    if(document.body.classList.contains('panel-left')){
-      if(dx > 0 && !navIsOpen()){ setNav(true); gStart.used = true; }
-      else if(dx < 0 && navIsOpen()){ setNav(false); gStart.used = true; }
-    } else {
-      if(dx < 0 && !navIsOpen()){ setNav(true); gStart.used = true; }
-      else if(dx > 0 && navIsOpen()){ setNav(false); gStart.used = true; }
-    }
-  }, { passive: true });
-  document.addEventListener('pointerup', function(){ gStart = null; }, { passive: true });
-  document.addEventListener('pointercancel', function(){ gStart = null; }, { passive: true });
+  /* No flick/swipe open-close (removed 2026-11-10): repeated field reports
+     of the panel closing mid-tap traced back to gesture interpretation —
+     a flick is undiscoverable anyway, and every accidental close costs more
+     than the gesture ever saved. Open = tab tap. Close = the close button,
+     a tap on the page side, or scrolling the page. */
 
   /* Close on page scroll: a scroll gesture on the page side is NOT intercepted —
      the page starts moving natively from the first pixel, and the panel closes
