@@ -211,13 +211,13 @@ footer .mock-note{margin:26px auto 0;max-width:640px;font-size:12px;color:rgba(2
 .btn-blog{background:#fff;color:var(--green);padding:15px 48px;font-size:16.5px;margin-top:30px;box-shadow:0 4px 18px rgba(0,0,0,.22);}
 
 /* ---------- FIXED BOOK PILL ---------- */
-.book-pill{position:fixed;top:16px;right:16px;z-index:70;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:.14em;padding:13px 26px;border-radius:999px;box-shadow:0 4px 16px rgba(19,30,53,.35);border:1.5px solid rgba(255,255,255,.55);transition:right .38s ease,opacity .25s ease;}
+.book-pill{position:fixed;top:16px;right:16px;z-index:85;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:.14em;padding:13px 26px;border-radius:999px;box-shadow:0 4px 16px rgba(19,30,53,.35);border:1.5px solid rgba(255,255,255,.55);transition:right .38s ease,opacity .25s ease;}
 .book-pill:hover{opacity:.88;}
 
 /* ---------- FIXED SIDE NAV (one form on all devices: handle + slide-in panel) ---------- */
 :root{--sidew:188px;}
 body{transition:padding-right .38s ease,padding-left .38s ease;}
-.side-nav{position:fixed;top:0;right:0;height:100%;width:var(--sidew);touch-action:none;z-index:80;background:#fff;border-left:1px solid var(--line);box-shadow:-6px 0 24px rgba(19,30,53,.08);display:flex;flex-direction:column;transform:translateX(106%);visibility:hidden;transition:transform .38s ease,visibility 0s linear .38s;}
+.side-nav{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 74px);bottom:0;right:0;width:var(--sidew);border-radius:14px 14px 0 0;touch-action:none;z-index:80;background:#fff;border-left:1px solid var(--line);box-shadow:-6px 0 24px rgba(19,30,53,.08),0 -6px 18px rgba(19,30,53,.06);display:flex;flex-direction:column;transform:translateX(106%);visibility:hidden;transition:transform .38s ease,visibility 0s linear .38s;}
 body.nav-open .side-nav{transform:none;visibility:visible;transition:transform .38s ease;}
 /* The gutter is constant — open or closed, the text never shifts sideways */
 body{padding-left:26px;padding-right:26px;}
@@ -256,7 +256,7 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 .nav-handle.peek-l{border-radius:0 10px 10px 0;}
 .nav-handle.peek-r{border-radius:10px 0 0 10px;}
 /* When the handle is docked left, the panel itself lives on the left */
-body.panel-left .side-nav{right:auto;left:0;border-left:none;border-right:1px solid var(--line);box-shadow:6px 0 24px rgba(19,30,53,.08);transform:translateX(-106%);}
+body.panel-left .side-nav{right:auto;left:0;border-left:none;border-right:1px solid var(--line);box-shadow:6px 0 24px rgba(19,30,53,.08),0 -6px 18px rgba(19,30,53,.06);transform:translateX(-106%);}
 body.panel-left.nav-open .side-nav{transform:none;}
 .nav-handle::before{content:"";position:absolute;top:0;bottom:0;left:-16px;width:16px;}
 .nav-handle .h-ico{font-size:15px;line-height:1;}
@@ -654,7 +654,6 @@ body.nav-open .nav-scrim{pointer-events:auto;}
     <button type="button" class="sn-item" data-target="activities"><span class="lbl">その他の活動</span><span class="dot"></span></button>
     <button type="button" class="sn-item" data-target="access"><span class="lbl">アクセス</span><span class="dot"></span></button>
     <button type="button" class="sn-item" data-target="contact"><span class="lbl">ご相談・お問い合わせ</span><span class="dot"></span></button>
-    <button type="button" class="sn-item book-link" data-book="1"><span class="lbl">ご予約</span><span class="dot"></span></button>
   </div>
   <div class="sn-closewrap">
     <button type="button" class="sn-close" id="navClose" aria-label="メニューを閉じる">閉じる ✕</button>
@@ -822,10 +821,6 @@ body.nav-open .nav-scrim{pointer-events:auto;}
 
   buttons.forEach(function(b){
     b.addEventListener('click', function(){
-      if(b.hasAttribute('data-book')){
-        window.location.href = 'index.html';
-        return;
-      }
       var id = b.getAttribute('data-target');
       var el = document.getElementById(id);
       if(!el){ return; }
