@@ -427,7 +427,21 @@ function glideToTop(){
   }, 16);
 }
 function validTel(v){ return /^0\d{9,10}$/.test(v.replace(/[^0-9]/g, "")); }
-function validMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+function validMail(v){
+  /* メールアドレスの決まりに合わせる：半角の印字できる文字だけ（全角・日本語・スペースは不可）。
+     @は1つだけ。@の前は英数字と記号が使えるが、ドットの先頭・末尾・連続は不可。
+     @の後はドットで区切られた英数字とハイフンの並びで、最後は2文字以上 */
+  if (!/^[\x21-\x7E]+$/.test(v)) return false;
+  const parts = v.split("@");
+  if (parts.length !== 2) return false;
+  const local = parts[0], domain = parts[1];
+  if (!/^[A-Za-z0-9!#$%&'*+\-\/=?^_`{|}~.]+$/.test(local)) return false;
+  if (local.startsWith(".") || local.endsWith(".") || local.includes("..")) return false;
+  if (!/^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(domain)) return false;
+  const labels = domain.split(".");
+  if (labels.some(l => !l || l.startsWith("-") || l.endsWith("-"))) return false;
+  return labels[labels.length - 1].length >= 2;
+}
 function setErr(id, bad){
   const inp = document.getElementById("f-" + id), msg = document.getElementById("e-" + id);
   inp.classList.toggle("invalid", bad);
