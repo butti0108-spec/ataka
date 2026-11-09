@@ -243,18 +243,18 @@ body{padding-left:26px;padding-right:26px;}
 body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
 /* While dragging, the tab lifts off the edge so it reads as "picked up / movable" */
 .nav-handle{transition:opacity .3s ease,box-shadow .18s ease,translate .18s ease;cursor:grab;}
-.nav-handle.dragging{box-shadow:-12px 8px 32px rgba(19,30,53,.55);translate:-6px 0;scale:1.09;cursor:grabbing;}
+/* The lift is neutral — no sideways lean, no directional shadow — so
+   nothing ever "faces the other way" at the midpoint or at the dock. */
+.nav-handle.dragging{box-shadow:0 10px 32px rgba(19,30,53,.5);scale:1.09;cursor:grabbing;}
 /* Docked to the left edge instead: shape, shadow and touch strip mirror */
 .nav-handle.on-left{left:0;right:auto;border-radius:0 10px 10px 0;box-shadow:none;}
 .nav-handle.on-left::before{left:auto;right:-16px;}
-.nav-handle.on-left.dragging{box-shadow:12px 8px 32px rgba(19,30,53,.55);translate:6px 0;}
+.nav-handle.on-left.dragging{box-shadow:0 10px 32px rgba(19,30,53,.5);}
 /* Gliding to the chosen edge after a drop */
 .nav-handle.snapping{transition:left .25s ease,top .25s ease,opacity .3s ease,box-shadow .18s ease,translate .18s ease;}
 /* While dragging, the corners preview the side it is about to dock to */
-.nav-handle.peek-l{border-radius:0 10px 10px 0;box-shadow:3px 0 14px rgba(19,30,53,.3);}
-.nav-handle.peek-r{border-radius:10px 0 0 10px;box-shadow:-3px 0 14px rgba(19,30,53,.3);}
-.nav-handle.peek-l.dragging{box-shadow:12px 8px 32px rgba(19,30,53,.55);translate:6px 0;}
-.nav-handle.peek-r.dragging{box-shadow:-12px 8px 32px rgba(19,30,53,.55);translate:-6px 0;}
+.nav-handle.peek-l{border-radius:0 10px 10px 0;}
+.nav-handle.peek-r{border-radius:10px 0 0 10px;}
 /* When the handle is docked left, the panel itself lives on the left */
 body.panel-left .side-nav{right:auto;left:0;border-left:none;border-right:1px solid var(--line);box-shadow:6px 0 24px rgba(19,30,53,.08);transform:translateX(-106%);}
 body.panel-left.nav-open .side-nav{transform:none;}
