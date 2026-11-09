@@ -103,6 +103,14 @@
   .remind { border:2px dashed #1D2C4D; border-radius:10px; padding:14px; background:#fbfcfe; }
   .remind .mail { background:#fff; border:1px solid #d6dee6; border-radius:8px; padding:12px; margin-top:10px; }
   footer { padding:18px 16px 26px; text-align:center; font-size:14px; color:#888; }
+.subh{font-size:17px;font-weight:700;color:#1D2C4D;margin:22px 0 6px;}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #E7E1D2;}
+.opt .on{flex:1;font-size:14.5px;line-height:1.5;}
+.opt .op{font-weight:700;color:#1D2C4D;white-space:nowrap;}
+.qty{display:flex;align-items:center;gap:6px;}
+.qty button{width:32px;height:32px;border-radius:50%;border:1px solid #C9CFDA;background:#fff;font-size:16px;color:#1D2C4D;padding:0;}
+.qty button:disabled{opacity:.35;}
+.qty .qv{min-width:18px;text-align:center;font-weight:700;}
 </style>
 </head>
 <body>
@@ -137,6 +145,10 @@
       <div class="dates" id="date-list" style="margin-top:10px;"></div>
       <div class="slots" id="slot-list"></div>
       <p class="legend">◎ 空きあり ／ ○ 残りわずか ／ △ 残り1枠 ／ × 満席・受付終了</p>
+      <h3 class="subh">オプション（任意）</h3>
+      <p class="note" style="margin-bottom:6px;">ご希望のオプションがあれば数量を選んでください。料金に加算されます（所要時間は変わりません）。</p>
+      <div id="option-list"></div>
+      <p class="summary" id="opt-total" style="margin-top:12px;"></p>
       <button class="btn" id="to-step3" disabled onclick="goStep(3)">お客様情報の入力へ進む</button>
       <button class="btn sub" onclick="goStep(1)">← コースを選び直す</button>
     </section>
@@ -194,6 +206,26 @@ const COURSES = [
   { id:"c8", name:"美容鍼 トライアルコース 20本", minutes:30, price:5500, pop:"", note:"承認制", img:"", fb:"鍼" },
   { id:"c9", name:"リカバリーコンプレッションブーツ（Normatec）", minutes:20, price:3000, pop:"", note:"承認制", img:"", fb:"圧" }
 ];
+const OPTIONS = [
+  { id:"o1", name:"【初回の方にオススメ】気づいていない問題を見つけるために…カラダの問題抽出チェック", price:3000, max:1 },
+  { id:"o2", name:"鍼治療（BODY）", price:2000, max:1 },
+  { id:"o3", name:"【治療効果持続】ホームケア・セルフエクササイズ指導《宿題》提案", price:1000, max:1 },
+  { id:"o4", name:"【立ち仕事の方必見！むくみ解消】下半身リカバリーコンプレッションブーツ（Normatec）", price:3000, max:1 },
+  { id:"o5", name:"【脂肪・皮膚の癒着リリース】シリコンカッピングケア", price:3000, max:1 },
+  { id:"o6", name:"【脂肪・皮膚の癒着リリース】筋膜カッサ・ガビランケア", price:3000, max:1 },
+  { id:"o7", name:"【即効性◎時短！ケアとの相乗効果バツグン！】深部まで届く！腰背部・モモ裏マッサージガン施術", price:1500, max:1 },
+  { id:"o8", name:"【リラックス！快眠へ…】アロマオイルケア", price:1000, max:1 },
+  { id:"o9", name:"【睡眠導入】カラダの緊張解放 頭皮鍼", price:2500, max:1 },
+  { id:"o10", name:"【抜け毛が気になる方へ】頭皮刺激！髪養鍼", price:2500, max:1 },
+  { id:"o11", name:"【眼精疲労】側頭部筋緊張に！視界がスッキリ！視爽鍼", price:2500, max:1 },
+  { id:"o12", name:"【ラインアップ、目ぱっちり】月に1回必須！美容鍼トライアル《20本》", price:5500, max:1 },
+  { id:"o13", name:"オリジナルグッズ luluキャップ（黒 or ベージュ / フリーサイズ）", price:3300, max:3 },
+  { id:"o14", name:"オリジナルグッズ luluトートバッグ（大サイズ）", price:2600, max:3 },
+  { id:"o15", name:"オリジナルグッズ luluトートバッグ（小サイズ）", price:2100, max:3 },
+  { id:"o16", name:"オリジナルグッズ luluTシャツ【長袖】（黒 or 白：XS / S / M / L / XL / XXL / XXXL）", price:5000, max:3 },
+  { id:"o17", name:"オリジナルグッズ luluTシャツ【半袖】（黒 or 白：XS / S / M / L / XL / XXL / XXXL）", price:4500, max:3 },
+  { id:"o18", name:"オリジナルグッズ luluステッカー（ホワイト・ダークグレー）", price:300, max:3 }
+];
 const CUSTOMERS = [
   { id:"u1", name:"山田花子（サンプル）", tel:"090-0000-1111", mail:"hanako@example.jp",
     profile:"会社員。デスクワーク中心。慢性的に首・肩が重い。月1回ペース希望。",
@@ -249,8 +281,39 @@ function availability(dateStr, time){
 
 <script>
 /* ================= 予約フロー ================= */
-const state = { course:null, date:null, dateStr:"", time:"" };
+const state = { course:null, date:null, dateStr:"", time:"", options:{} };
 let days = []; /* 今日から14日分 */
+
+
+function optTotal(){ return OPTIONS.reduce((sum,o)=> sum + o.price * (state.options[o.id]||0), 0); }
+function optText(){
+  return OPTIONS.filter(o=> (state.options[o.id]||0) > 0)
+    .map(o=>{ const q = state.options[o.id]; return q > 1 ? o.name+" ×"+q : o.name; }).join("、");
+}
+function renderOptions(){
+  const box = document.getElementById("option-list");
+  if (!box) return;
+  box.innerHTML = "";
+  OPTIONS.forEach(o=>{
+    const qty = state.options[o.id] || 0;
+    const row = document.createElement("div");
+    row.className = "opt";
+    const nm = document.createElement("span"); nm.className = "on"; nm.textContent = o.name;
+    const pr = document.createElement("span"); pr.className = "op"; pr.textContent = fmtPrice(o.price);
+    const q = document.createElement("span"); q.className = "qty";
+    const minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−"; minus.disabled = qty <= 0;
+    minus.onclick = ()=>{ state.options[o.id] = Math.max(0, qty-1); renderOptions(); };
+    const qv = document.createElement("span"); qv.className = "qv"; qv.textContent = qty;
+    const plus = document.createElement("button"); plus.type = "button"; plus.textContent = "＋"; plus.disabled = qty >= o.max;
+    plus.onclick = ()=>{ state.options[o.id] = Math.min(o.max, qty+1); renderOptions(); };
+    q.appendChild(minus); q.appendChild(qv); q.appendChild(plus);
+    row.appendChild(nm); row.appendChild(pr); row.appendChild(q);
+    box.appendChild(row);
+  });
+  const el = document.getElementById("opt-total");
+  const c = state.course ? courseById(state.course) : null;
+  if (el){ el.textContent = c ? "合計：コース "+fmtPrice(c.price)+" ＋ オプション "+fmtPrice(optTotal())+" ＝ "+fmtPrice(c.price + optTotal())+"（税込）" : ""; }
+}
 
 function renderCourses(){
   const box = document.getElementById("course-list");
@@ -269,6 +332,7 @@ function renderCourses(){
       + '<div class="cfoot"><button type="button" class="book-btn">予約する</button></div>';
     d.querySelector(".book-btn").onclick = ()=>{
       state.course = c.id;
+      renderOptions();
       renderCourses();
       goStep(2);
     };
@@ -329,7 +393,7 @@ function goStep(n){
   }
   if (n===3){
     const c = courseById(state.course);
-    document.getElementById("sel-slot-note").textContent = fmtDate(state.date)+" "+state.time+"〜 ／ "+c.name+"（"+(c.dmin||c.minutes)+"分）"+fmtPrice(c.price);
+    document.getElementById("sel-slot-note").textContent = fmtDate(state.date)+" "+state.time+"〜 ／ "+c.name+"（"+(c.dmin||c.minutes)+"分）"+fmtPrice(c.price) + (optTotal() > 0 ? " ／ オプション込み合計 "+fmtPrice(c.price + optTotal())+"（税込）" : "");
   }
   /* 動き：ステップが切り替わるのと同時に、進捗バーのところまで1回のスライドで戻る
      （ヘッダーは毎回見なくてよいので、一番上までは戻らない。瞬間移動もしない） */
@@ -360,12 +424,14 @@ function submitInfo(){
   const rows = [
     ["コース", c.name],
     ["日時", fmtDate(state.date)+" "+state.time+"〜"+endTime(state.time, c.minutes)],
-    ["料金", fmtPrice(c.price)+"（税込）"],
+    ["料金", fmtPrice(c.price + optTotal())+"（税込）"],
     ["お名前", name],
     ["電話番号", tel],
     ["メール", mail],
     ["ご要望", memo || "（なし）"]
   ];
+  const otx = optText();
+  if (otx){ rows.splice(2, 0, ["オプション", otx]); }
   if (c.note){ rows.push(["ご注意", "承認制コースです。ご予約後にサロンから確認のご連絡をいたします"]); }
   const html = rows.map(r=>"<dt>"+r[0]+"</dt><dd>"+r[1]+"</dd>").join("");
   document.getElementById("confirm-list").innerHTML = html;
@@ -380,7 +446,7 @@ function finishBooking(){
   glideToTop();
 }
 function resetBooking(){
-  state.course = null; state.time = "";
+  state.course = null; state.time = ""; state.options = {}; renderOptions();
   document.getElementById("to-step3").disabled = true;
   ["f-name","f-tel","f-mail","f-memo"].forEach(id=>{ document.getElementById(id).value=""; });
   state.date = days[0]; state.dateStr = dateKey(days[0]);
@@ -451,7 +517,7 @@ function glideToField(anchor){
   days = [];
   for (let i=0;i<14;i++){ days.push(new Date(today.getFullYear(), today.getMonth(), today.getDate()+i)); }
   state.date = days[0]; state.dateStr = dateKey(days[0]);
-  renderCourses(); renderDates(); renderSlots();
+  renderCourses(); renderDates(); renderSlots(); renderOptions();
   goStep(1);
 })();
 </script>

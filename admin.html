@@ -140,10 +140,10 @@ const CUSTOMERS = [
 ];
 /* 今日の予約サンプル（日付は表示時に「今日」へ差し替える） */
 const BOOKINGS = [
-  { time:"10:00", customerId:"u1", courseId:"c4" },
+  { time:"10:00", customerId:"u1", courseId:"c4", opts:[["鍼治療（BODY）",2000]] },
   { time:"11:30", customerId:"u2", courseId:"c2" },
   { time:"14:00", customerId:"u3", courseId:"c4" },
-  { time:"16:00", customerId:"u4", courseId:"c1" },
+  { time:"16:00", customerId:"u4", courseId:"c1", opts:[["【治療効果持続】ホームケア・セルフエクササイズ指導《宿題》提案",1000]] },
   { time:"18:30", customerId:"u1", courseId:"c2" }
 ];
 
@@ -197,7 +197,8 @@ function renderAdmin(){
     const b = document.createElement("button");
     b.className = "cust";
     b.innerHTML = '<span class="tm">'+bk.time+"〜"+endTime(bk.time, co.minutes)+'</span>　<span class="nm">'+cu.name+'</span><br>'
-      + '<span class="last">'+courseLabel(co)+"（"+co.minutes+"分／"+fmtPrice(co.price)+"）</span>";
+      + '<span class="last">'+courseLabel(co)+"（"+co.minutes+"分／"+fmtPrice(co.price)+"）</span>"
+      + (bk.opts ? '<br><span class="last">オプション：'+bk.opts.map(o=>o[0]).join("、")+"（+"+fmtPrice(bk.opts.reduce((sm,o)=>sm+o[1],0))+"）</span>" : "");
     b.onclick = ()=>openDetail(cu.id, b);
     box.appendChild(b);
   });
