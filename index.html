@@ -514,7 +514,10 @@ function resetBooking(){
    スマホでは下の欄がキーボードに隠れるため、お客様に自分でスクロールさせない。
    キーボードの「次へ」でも、欄をタップしても、Enterでも、フォーカスが移れば同じ動きになる */
 let fieldGlideTimer = null;
+let fieldGlideTimeout = null;
 function glideToField(anchor){
+  /* 予約済みのフォーカス寄せが残っていたら取り消す（エラーの場所への寄せを横取りさせない） */
+  if (fieldGlideTimeout){ clearTimeout(fieldGlideTimeout); fieldGlideTimeout = null; }
   const startY = window.scrollY;
   const targetY = Math.max(0, Math.round(anchor.getBoundingClientRect().top + startY) - 10);
   if (Math.abs(targetY - startY) < 4) return;
@@ -540,7 +543,7 @@ function glideToField(anchor){
     el.addEventListener("focus", ()=>{
       const label = document.querySelector('label[for="'+id+'"]') || el;
       /* キーボードが開く時間を待ってから寄せる（開く前の位置で計算するとずれる） */
-      setTimeout(()=>glideToField(label), 350);
+      fieldGlideTimeout = setTimeout(()=>glideToField(label), 350);
     });
     if (el.tagName === "INPUT"){
       el.addEventListener("keydown", (ev)=>{
