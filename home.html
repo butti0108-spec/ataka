@@ -161,6 +161,9 @@ section{position:relative;}
 .link-grid a{display:flex;align-items:center;justify-content:center;min-height:60px;background:#fff;border:1.5px solid var(--line);border-radius:8px;text-decoration:none;font-size:16px;font-weight:700;color:var(--navy);letter-spacing:.04em;text-align:center;padding:4px 8px;transition:border-color .2s ease,background .2s ease;}
 .link-grid a:hover{border-color:var(--navy);background:rgba(255,255,255,.6);}
 .link-grid a small{display:block;font-size:12px;color:var(--muted);font-weight:400;letter-spacing:.02em;}
+.link-grid li.wide{grid-column:1/-1;}
+.link-grid li.wide a{background:var(--navy);color:#fff;border-color:var(--navy);min-height:64px;}
+.link-grid li.wide a small{color:rgba(255,255,255,.75);}
 
 /* ---------- ACCESS ---------- */
 .access-flex{display:flex;gap:44px;align-items:stretch;max-width:940px;margin:0 auto;}
@@ -553,15 +556,11 @@ body:not(.nav-open) .nav-handle{opacity:1;pointer-events:auto;}
     <div class="link-collection">
       <h3 class="rv">その他の公開リンク</h3>
       <ul class="link-grid">
-        <li class="rv"><a href="https://line.me/R/ti/p/@ulg4697j" target="_blank" rel="noopener">LINE公式アカウント</a></li>
         <li class="rv"><a href="https://www.instagram.com/atakayusuke/" target="_blank" rel="noopener">Instagram<small>@atakayusuke</small></a></li>
         <li class="rv"><a href="https://www.instagram.com/lulu_conditioning_salon/" target="_blank" rel="noopener">Instagram（サロン）<small>@lulu_conditioning_salon</small></a></li>
         <li class="rv"><a href="https://www.facebook.com/yusuke.ataka.9" target="_blank" rel="noopener">Facebook</a></li>
-        <li class="rv"><a href="https://twitter.com/atakayusuke" target="_blank" rel="noopener">X<small>@atakayusuke</small></a></li>
-        <li class="rv"><a href="https://www.youtube.com/channel/UCUJYcGf30dPDDXTVdxF8CnA" target="_blank" rel="noopener">YouTube<small>あたチャン</small></a></li>
         <li class="rv"><a href="https://www.dream-coaching.com/coach/n8MD1LWvZp" target="_blank" rel="noopener">Dream Coaching</a></li>
-        <li class="rv"><a href="https://maps.app.goo.gl/QsLjzjN7Fxxoqa9K9" target="_blank" rel="noopener">Googleマップ</a></li>
-        <li class="rv"><a href="https://lit.link/atakayusuke" target="_blank" rel="noopener">lit.link<small>リンク集</small></a></li>
+        <li class="rv wide"><a href="https://lit.link/atakayusuke" target="_blank" rel="noopener">その他のリンクはこちら<small>lit.link（リンク集）</small></a></li>
       </ul>
     </div>
   </div>
