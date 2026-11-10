@@ -87,8 +87,9 @@
   .w-head .wh.closed { background:#eef0f3; color:#999; }
   .w-body { display:grid; grid-template-columns:44px repeat(7,1fr); gap:4px; }
   .w-times { position:relative; }
-  .w-times span { position:absolute; right:6px; transform:translateY(-50%); font-size:14px; color:#555; }
-  .w-col { position:relative; background:repeating-linear-gradient(#fff, #fff 57px, #e3e8ee 57px, #e3e8ee 58px); border:1px solid #d6dee6; border-radius:6px; }
+  .w-times span { position:absolute; right:6px; transform:translateY(-50%); margin-top:1px; font-size:14px; color:#555; }
+  .w-times span.half { font-size:11px; color:#9aa7b4; }
+  .w-col { position:relative; background:repeating-linear-gradient(#d9e0e8, #d9e0e8 0.5px, transparent 0.5px, transparent 57.5px, #d9e0e8 57.5px, #d9e0e8 58px), repeating-linear-gradient(#edf0f4, #edf0f4 0.5px, #fff 0.5px, #fff 9.1667px, #edf0f4 9.1667px, #edf0f4 9.6667px); border:1px solid #d6dee6; border-radius:6px; }
   .w-col.closed { background:#eef0f3; }
   .w-ev { position:absolute; left:3px; right:3px; border-radius:6px; padding:3px 4px; overflow:hidden; line-height:1.3; }
   .w-ev .ee { display:block; font-size:10.5px; line-height:1.25; color:#c9d6ea; }
@@ -108,6 +109,10 @@
   .blk-row .del { float:right; font-size:15px; font-weight:bold; color:#c0392b; background:none; border:none; cursor:pointer; padding:4px 6px; }
   select.fi { width:100%; padding:13px; font-size:16px; border:2px solid #c9d3dd; border-radius:8px; background:#fff; box-sizing:border-box; }
   footer { padding:18px 16px 26px; text-align:center; font-size:14px; color:#888; }
+
+  .kb-pc { display:none; }
+  @media (min-width:900px){ .kb-pc { display:inline; } .kb-sp { display:none; } }
+  .kb-gap { display:block; height:.5em; }
 </style>
 </head>
 <body>
@@ -152,12 +157,12 @@
     <div id="cal-body"></div>
     <p class="note" id="cal-legend" style="margin-top:10px;"></p>
 
-    <p class="note" style="margin-top:14px;">受付停止の登録は、上の「受付停止」のタブからできます。登録した時間帯は、このカレンダーにグレーで表示されます。</p>
+    <p class="note" style="margin-top:14px;"><span class="kb kb-sp">受付停止の登録は、<br>上の「受付停止」のタブからできます。<br><span class="kb-gap"></span>登録した時間帯は、このカレンダーに<br>グレーで表示されます。</span><span class="kb kb-pc">受付停止の登録は、上の「受付停止」のタブからできます。<br><span class="kb-gap"></span>登録した時間帯は、このカレンダーにグレーで表示されます。</span></p>
   </main>
   <!-- ============ 受付停止 ============ -->
   <main id="view-blk" class="hidden">
     <h2 class="sec">受付停止</h2>
-    <p class="note">出張・研修・ご都合などで予約を受けない時間帯を登録します。登録した時間帯は、お客様の予約画面で選べなくなります。</p>
+    <p class="note"><span class="kb kb-sp">出張・研修・ご都合などで予約を受けない時間帯を<br>登録します。<br><span class="kb-gap"></span>登録した時間帯は、お客様の予約画面で<br>選べなくなります。</span><span class="kb kb-pc">出張・研修・ご都合などで予約を受けない時間帯を登録します。<br>登録した時間帯は、お客様の予約画面で選べなくなります。</span></p>
     <label class="fl" for="blk-date">日付</label>
     <input class="fi" id="blk-date" type="date">
     <label class="fl"><input type="checkbox" id="blk-allday" onchange="toggleBlkAllDay()"> 終日、受付を停止する</label>
@@ -185,7 +190,7 @@
         <textarea class="fi" id="karte-memo" placeholder="施術内容・状態・次回の注意点など"></textarea>
         <div class="mic-row">
           <button class="mic" id="mic-btn" type="button">🎤 マイクで入力</button>
-          <span class="note" id="mic-status">ボタンを押して話すと、声が文字になってメモに入ります。</span>
+          <span class="note" id="mic-status">ボタンを押して話すと、声が文字になって<br>メモに入ります。</span>
         </div>
         <p class="note" id="karte-saved" style="margin-top:8px;">メモは自動で保存されます。</p>
         <button class="btn sub sm" type="button" onclick="closeDetail()">← 一覧に戻る</button>
@@ -542,7 +547,7 @@ function renderCal(){
     [3,5,7].forEach(n=>{ switcher += '<button type="button" class="'+(n===N?"active":"")+'" onclick="setCalDays('+n+')">'+n+'日</button>'; });
     switcher += '</div>';
     let head = '<div></div>', cols = '<div class="w-times" style="height:'+HGT+'px">';
-    for (let hh=H0; hh<=H1; hh++) cols += '<span style="top:'+((hh-H0)*PX)+'px">'+hh+":00</span>";
+    for (let hh=H0; hh<=H1; hh++){ cols += '<span style="top:'+((hh-H0)*PX)+'px">'+hh+":00</span>"; if (hh<H1) cols += '<span class="half" style="top:'+((hh-H0)*PX+PX/2+2)+'px">'+hh+":30</span>"; }
     cols += "</div>";
     for (let i=0;i<N;i++){
       const d = new Date(start); d.setDate(start.getDate()+i);
@@ -603,7 +608,7 @@ function renderCal(){
       h += '<div class="blk-row" style="cursor:pointer" onclick="showTab(\'blk\')">受付停止：'+(bl.start ? bl.start+"〜"+bl.end : "終日")+"（"+bl.memo+"）</div>";
     });
     body.innerHTML = h;
-    document.getElementById("cal-legend").textContent = "予約を押すとお客様の詳細が開きます。受付停止の行を押すと、受付停止のタブで編集できます。";
+    document.getElementById("cal-legend").innerHTML = "<span class=\"kb kb-sp\">予約を押すとお客様の詳細が開きます。<br>受付停止の行を押すと、受付停止のタブで<br>編集できます。</span><span class=\"kb kb-pc\">予約を押すとお客様の詳細が開きます。<br>受付停止の行を押すと、受付停止のタブで編集できます。</span>";
   }
   renderBlkList();
 }
