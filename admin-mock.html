@@ -608,7 +608,7 @@ function renderCal(){
       h += '<div class="blk-row" style="cursor:pointer" onclick="showTab(\'blk\')">受付停止：'+(bl.start ? bl.start+"〜"+bl.end : "終日")+"（"+bl.memo+"）</div>";
     });
     body.innerHTML = h;
-    document.getElementById("cal-legend").innerHTML = "<span class=\"kb kb-sp\">予約を押すとお客様の詳細が開きます。<br>受付停止の行を押すと、受付停止のタブで<br>編集できます。</span><span class=\"kb kb-pc\">予約を押すとお客様の詳細が開きます。<br>受付停止の行を押すと、受付停止のタブで編集できます。</span>";
+    document.getElementById("cal-legend").innerHTML = "<span class=\"kb kb-sp\">予約を押すとお客様の詳細が開きます。<br>受付停止の行を押すと、受付停止のタブで<br>編集できます。</span><span class=\"kb kb-pc\">予約を押すとお客様の詳細が開きます。受付停止の行を押すと、受付停止のタブで<br>編集できます。</span>";
   }
   renderBlkList();
 }
