@@ -115,10 +115,10 @@ const COURSES = [
   { id:"c3", name:"感動体験トライアルコース", minutes:60, price:9000, approval:false },
   { id:"c4", name:"ツライ部分に集中・ポイントケアコース", minutes:50, price:6500, approval:false },
   { id:"c5", name:"only U-23コース", minutes:20, price:3500, approval:false },
-  { id:"c6", name:"美容鍼 プレミアム 100本", minutes:50, price:16000, approval:true },
-  { id:"c7", name:"美容鍼 スタンダード 50本", minutes:40, price:11000, approval:true },
-  { id:"c8", name:"美容鍼 トライアル 20本", minutes:30, price:5500, approval:true },
-  { id:"c9", name:"リカバリーコンプレッションブーツ（Normatec）", minutes:20, price:3000, approval:true }
+  { id:"c6", name:"美容鍼 プレミアム 100本", minutes:50, price:16000, approval:false },
+  { id:"c7", name:"美容鍼 スタンダード 50本", minutes:40, price:11000, approval:false },
+  { id:"c8", name:"美容鍼 トライアル 20本", minutes:30, price:5500, approval:false },
+  { id:"c9", name:"リカバリーコンプレッションブーツ（Normatec）", minutes:20, price:3000, approval:false }
 ];
 const CUSTOMERS = [
   { id:"u1", name:"山田花子（サンプル）", kana:"ヤマダハナコ", tel:"090-0000-1111", mail:"hanako@example.jp",
@@ -158,7 +158,7 @@ function endTime(start, minutes){
   const t = h*60+m+minutes;
   return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");
 }
-function courseLabel(co){ return co.name + (co.approval ? '<span class="badge">承認制</span>' : ""); }
+function courseLabel(co){ return co.name; }
 
 /* ================= タブ ================= */
 let currentTab = "today";
